@@ -17,23 +17,28 @@ function historyTopicId(subjectId,groupName){
   return tid(d,g,0);
 }
 
-function seedKnownHistory(){
+function ensureKnownHistory(){
   const seeds=[
     {
       id:historyTopicId("estado-democracia-direitos-e-ciencia-politica","Ordem Constitucional e Direitos"),
-      values:{questoes:20,acertos:14,erros:6,brancos:0,obs:"Histórico até 18/10: Princípios Fundamentais — 20 questões, 14 acertos e 6 erros (40% líquido Cebraspe)."}
+      values:{questoes:20,acertos:14,erros:6,brancos:0,obs:"Histórico até 18/10: Princípios Fundamentais — 20 questões, 14 acertos e 6 erros (40% líquido Cebraspe).",historico:true}
     },
     {
       id:historyTopicId("computacao-em-nuvem-virtualizacao-e-automacao","Virtualização e Contêineres"),
-      values:{questoes:20,acertos:16,erros:2,brancos:2,obs:"Histórico até 18/10: Virtualização — 20 questões, 16 acertos, 2 erros e 2 em branco (80% bruto e 70% líquido Cebraspe)."}
+      values:{questoes:20,acertos:16,erros:2,brancos:2,obs:"Histórico até 18/10: Virtualização — 20 questões, 16 acertos, 2 erros e 2 em branco (80% bruto e 70% líquido Cebraspe).",historico:true}
     }
   ];
+  let changed=false;
   seeds.forEach(({id,values})=>{
     if(!id)return;
     const current=state[id]||{};
-    const hasUserData=Number(current.questoes)>0 || Number(current.acertos)>0 || Number(current.erros)>0 || Number(current.brancos)>0;
-    if(!hasUserData) state[id]={...current,...values,historico:true};
+    const hasData=Number(current.questoes)>0 || Number(current.acertos)>0 || Number(current.erros)>0 || Number(current.brancos)>0;
+    if(!hasData){
+      state[id]={...current,...values,updatedAtMs:Number(current.updatedAtMs)||Date.now()};
+      changed=true;
+    }
   });
+  return changed;
 }
 
 // Permite registrar questões em branco sem tratá-las como erro.
@@ -57,18 +62,35 @@ setQuestion=function(id,field,val){
   if(field==="acertos")a=Math.max(0,Number(val)||0);
   if(field==="brancos")b=Math.max(0,Number(val)||0);
   if(a+b>q)q=a+b;
-  setTS(id,{questoes:q,acertos:a,brancos:b,erros:Math.max(q-a-b,0)});
+  setTS(id,{questoes:q,acertos:a,brancos:b,erros:Math.max(q-a-b,0),updatedAtMs:Date.now()});
   save();renderAll();
 };
+
+function knownOverallStats(){
+  const rows=topicsFlat();
+  const mapped={
+    questoes:rows.reduce((s,x)=>s+x.m.q,0),
+    acertos:rows.reduce((s,x)=>s+x.m.a,0),
+    erros:rows.reduce((s,x)=>s+x.m.e,0),
+    brancos:rows.reduce((s,x)=>s+(Number(x.m.s.brancos)||0),0)
+  };
+  return {
+    mapped,
+    total:{
+      questoes:HISTORY_BASE.semTopico.questoes+mapped.questoes,
+      acertos:HISTORY_BASE.semTopico.acertos+mapped.acertos,
+      erros:HISTORY_BASE.semTopico.erros+mapped.erros,
+      brancos:HISTORY_BASE.semTopico.brancos+mapped.brancos
+    }
+  };
+}
 
 const originalLoad=load;
 load=function(){
   originalLoad();
-  const marker="cgu3_history_seed_v1";
-  if(localStorage.getItem(marker)!=="1"){
-    seedKnownHistory();
-    localStorage.setItem(marker,"1");
-    save();
+  const changed=ensureKnownHistory();
+  if(changed){
+    try{localStorage.setItem(KEY,JSON.stringify({version:5,state,settings,lessonState}));}catch(e){}
   }
 };
 
@@ -77,14 +99,18 @@ renderDashboard=function(){
   originalRenderDashboard();
   const block=document.getElementById("blockStats");
   if(block){
+    const old=document.getElementById("historySnapshot");
+    if(old)old.remove();
+    const stats=knownOverallStats();
+    const gross=stats.total.questoes?100*stats.total.acertos/stats.total.questoes:null;
     block.insertAdjacentHTML("afterbegin",`
-      <div style="border:1px solid #dbeafe;background:#eff6ff;border-radius:11px;padding:12px;margin-bottom:12px">
+      <div id="historySnapshot" style="border:1px solid #dbeafe;background:#eff6ff;border-radius:11px;padding:12px;margin-bottom:12px">
         <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:7px">
-          <b style="color:#17365D">Histórico até ${HISTORY_BASE.ate}</b>
-          <span class="badge p1">85 questões</span>
-          <span class="badge high">70,6% bruto</span>
+          <b style="color:#17365D">Base histórica + lançamentos atuais</b>
+          <span class="badge p1">${stats.total.questoes} questões conhecidas</span>
+          <span class="badge high">${fmtPct(gross)} bruto geral</span>
         </div>
-        <div class="small"><b>${HISTORY_BASE.acertos} acertos</b> · ${HISTORY_BASE.erros} erros · ${HISTORY_BASE.brancos} em branco. Destes, <b>40 já estão vinculados aos tópicos do edital</b>: Princípios Fundamentais e Virtualização. Os outros 45 permanecem como histórico sem tópico informado (${HISTORY_BASE.semTopico.acertos} acertos, ${HISTORY_BASE.semTopico.erros} erros e ${HISTORY_BASE.semTopico.brancos} em branco), para não atribuir questões à matéria errada.</div>
+        <div class="small"><b>${stats.total.acertos} acertos</b> · ${stats.total.erros} erros · ${stats.total.brancos} em branco. No edital, <b>${stats.mapped.questoes} questões estão vinculadas a tópicos específicos</b>. Outras ${HISTORY_BASE.semTopico.questoes} permanecem apenas no histórico geral para não serem atribuídas à matéria errada.</div>
       </div>`);
   }
 };
