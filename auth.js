@@ -1,4 +1,5 @@
-/* Login real via Firebase Authentication. Nenhuma senha fica no código do site. */
+/* Login real via Firebase Authentication.
+   A tela pede apenas a senha; a conta autorizada não é exibida ao usuário. */
 (() => {
   const gate = document.getElementById("authGate");
   const form = document.getElementById("authForm");
@@ -9,12 +10,31 @@
   const googleButton = document.getElementById("googleAuthButton");
   const toggle = document.getElementById("toggleAuthPassword");
 
+  // O e-mail continua existindo no HTML por compatibilidade, mas fica invisível e não é usado.
+  if (email) {
+    const field = email.closest(".auth-field");
+    if (field) field.hidden = true;
+    email.required = false;
+    email.value = "";
+    email.setAttribute("aria-hidden", "true");
+    email.tabIndex = -1;
+  }
+
+  // Login Google foi removido deste fluxo: só a conta privada cadastrada por e-mail/senha é aceita.
+  if (googleButton) googleButton.hidden = true;
+
+  const title = document.getElementById("authTitle");
+  if (title) title.textContent = "Acesso privado ao plano de estudos";
+  const intro = gate?.querySelector(".auth-card > p");
+  if (intro) intro.textContent = "Digite somente a senha da conta autorizada. O endereço de acesso não é exibido nesta tela.";
+  const note = gate?.querySelector(".auth-note");
+  if (note) note.textContent = "A senha nunca fica gravada no código. O acesso usa Firebase Authentication e os dados permanecem protegidos pelas regras do Firestore.";
+
   function setBusy(busy, text) {
     if (button) {
       button.disabled = !!busy;
       button.textContent = text || (busy ? "Entrando..." : "Entrar");
     }
-    if (googleButton) googleButton.disabled = !!busy;
   }
 
   function unlock(user) {
@@ -28,19 +48,16 @@
     document.body.classList.add("auth-locked");
     if (gate) gate.hidden = false;
     setBusy(false, "Entrar");
-    setTimeout(() => email && email.focus(), 80);
+    setTimeout(() => password && password.focus(), 80);
   }
 
   function friendlyError(err) {
     const code = err && err.code ? err.code : "";
-    if (code === "auth/invalid-email") return "E-mail inválido.";
     if (code === "auth/missing-password") return "Informe a senha.";
-    if (code === "auth/invalid-credential" || code === "auth/wrong-password" || code === "auth/user-not-found") return "E-mail ou senha inválidos.";
+    if (code === "auth/invalid-credential" || code === "auth/wrong-password" || code === "auth/user-not-found") return "Senha inválida.";
     if (code === "auth/too-many-requests") return "Muitas tentativas. Aguarde alguns minutos e tente novamente.";
-    if (code === "auth/popup-closed-by-user") return "Login com Google cancelado.";
-    if (code === "auth/popup-blocked") return "O navegador bloqueou a janela do Google. Libere pop-ups e tente novamente.";
-    if (code === "auth/operation-not-allowed") return "Este método de login ainda não foi habilitado no Firebase Authentication.";
-    return "Não foi possível entrar. Confira o Firebase Authentication e tente novamente.";
+    if (code === "auth/operation-not-allowed") return "Login por e-mail/senha ainda não foi habilitado no Firebase Authentication.";
+    return "Não foi possível entrar. Confira a senha e a configuração do Firebase Authentication.";
   }
 
   function renderFirebaseUser(user) {
@@ -59,10 +76,9 @@
       box.innerHTML = "";
       return;
     }
-    const label = user.displayName || user.email || "Usuário autenticado";
     box.innerHTML = `
       <div class="firebase-user-title">☁ Firebase</div>
-      <div class="firebase-user-email">${escapeAuth(label)}</div>
+      <div class="firebase-user-email">Conta autorizada</div>
       <div id="cloudStatus" class="firebase-cloud-status">Conectando...</div>
       <button type="button" id="firebaseLogout">Sair</button>
     `;
@@ -71,16 +87,17 @@
     });
   }
 
-  function escapeAuth(value) {
-    return String(value || "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]));
-  }
-
   window.addEventListener("cgu-cloud-status", ev => {
     const el = document.getElementById("cloudStatus");
     if (!el) return;
     const detail = ev.detail || {};
     el.textContent = detail.message || "Firebase";
     el.dataset.status = detail.status || "";
+  });
+
+  window.addEventListener("cgu-auth-denied", () => {
+    if (error) error.textContent = "Conta não autorizada para este painel.";
+    lock();
   });
 
   if (toggle && password) {
@@ -98,20 +115,7 @@
       error.textContent = "";
       setBusy(true, "Entrando...");
       try {
-        await window.FirebaseCGU.signInEmail(email.value, password.value);
-      } catch (err) {
-        error.textContent = friendlyError(err);
-        setBusy(false, "Entrar");
-      }
-    });
-  }
-
-  if (googleButton) {
-    googleButton.addEventListener("click", async () => {
-      error.textContent = "";
-      setBusy(true, "Abrindo Google...");
-      try {
-        await window.FirebaseCGU.signInGoogle();
+        await window.FirebaseCGU.signInPrivate(password.value);
       } catch (err) {
         error.textContent = friendlyError(err);
         setBusy(false, "Entrar");
