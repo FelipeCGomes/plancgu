@@ -1,5 +1,6 @@
 /* Firebase: autenticação real + persistência em nuvem.
-   O firebaseConfig é público por design; a segurança está no Firebase Auth + Firestore Rules. */
+   O firebaseConfig é público por design; a segurança está no Firebase Auth + Firestore Rules.
+   A conta permitida não fica gravada como texto legível no HTML/JS. */
 (() => {
   const firebaseConfig = {
     apiKey: "AIzaSyAOrJl7WX6YaKGsjPAfPPMTByk-a7Y9Hi0",
@@ -12,6 +13,14 @@
   };
 
   const SDK = "13.0.0";
+
+  // SHA-256 do e-mail autorizado. O endereço em si não fica exposto como string no código.
+  const ALLOWED_EMAIL_HASH = "2c63bb36f75ebba101b6513bca5fc74fda0b5abcd54ea90767457193e7e22126";
+
+  // O Firebase Auth por e-mail/senha precisa receber o endereço em tempo de execução.
+  // Os bytes abaixo evitam exposição casual em texto claro, mas NÃO devem ser tratados como segredo criptográfico.
+  const PRIVATE_LOGIN_BYTES = [102,108,112,100,97,99,111,115,116,97,103,111,109,101,115,64,103,109,97,105,108,46,99,111,109];
+
   const userListeners = new Set();
   let app = null;
   let auth = null;
@@ -21,9 +30,32 @@
   let currentUser;
   let syncEnabled = false;
   let syncTimer = null;
+  let authCheckRunning = false;
 
   function emitStatus(status, message) {
     window.dispatchEvent(new CustomEvent("cgu-cloud-status", { detail: { status, message } }));
+  }
+
+  function privateLoginEmail() {
+    return new TextDecoder().decode(new Uint8Array(PRIVATE_LOGIN_BYTES));
+  }
+
+  async function sha256(text) {
+    const bytes = new TextEncoder().encode(String(text || "").trim().toLowerCase());
+    const digest = await crypto.subtle.digest("SHA-256", bytes);
+    return Array.from(new Uint8Array(digest)).map(b => b.toString(16).padStart(2, "0")).join("");
+  }
+
+  async function isAllowedUser(user) {
+    if (!user || !user.email || !window.crypto || !crypto.subtle) return false;
+    return (await sha256(user.email)) === ALLOWED_EMAIL_HASH;
+  }
+
+  function notifyUser(user) {
+    currentUser = user || null;
+    userListeners.forEach(fn => {
+      try { fn(currentUser); } catch (e) { console.error(e); }
+    });
   }
 
   const ready = (async () => {
@@ -40,12 +72,32 @@
       auth = authModule.getAuth(app);
       db = firestoreModule.getFirestore(app);
 
-      authModule.onAuthStateChanged(auth, (user) => {
-        currentUser = user || null;
-        userListeners.forEach(fn => {
-          try { fn(currentUser); } catch (e) { console.error(e); }
-        });
-        emitStatus(user ? "online" : "signed-out", user ? "Conectado ao Firebase" : "Desconectado");
+      authModule.onAuthStateChanged(auth, async (user) => {
+        if (authCheckRunning) return;
+        authCheckRunning = true;
+        try {
+          if (!user) {
+            syncEnabled = false;
+            notifyUser(null);
+            emitStatus("signed-out", "Desconectado");
+            return;
+          }
+
+          const allowed = await isAllowedUser(user);
+          if (!allowed) {
+            syncEnabled = false;
+            notifyUser(null);
+            emitStatus("denied", "Conta não autorizada");
+            await authModule.signOut(auth);
+            window.dispatchEvent(new CustomEvent("cgu-auth-denied"));
+            return;
+          }
+
+          notifyUser(user);
+          emitStatus("online", "Conectado ao Firebase");
+        } finally {
+          authCheckRunning = false;
+        }
       });
 
       return { app, auth, db };
@@ -57,16 +109,9 @@
     }
   })();
 
-  async function signInEmail(email, password) {
+  async function signInPrivate(password) {
     await ready;
-    return authMod.signInWithEmailAndPassword(auth, email.trim(), password);
-  }
-
-  async function signInGoogle() {
-    await ready;
-    const provider = new authMod.GoogleAuthProvider();
-    provider.setCustomParameters({ prompt: "select_account" });
-    return authMod.signInWithPopup(auth, provider);
+    return authMod.signInWithEmailAndPassword(auth, privateLoginEmail(), password);
   }
 
   async function signOutUser() {
@@ -140,14 +185,14 @@
   window.FirebaseCGU = {
     ready,
     onUser,
-    signInEmail,
-    signInGoogle,
+    signInPrivate,
     signOut: signOutUser,
     readState,
     writeState,
     scheduleSync,
     enableSync,
     disableSync,
+    isAllowedUser,
     get currentUser() { return currentUser || null; },
     get projectId() { return firebaseConfig.projectId; }
   };
