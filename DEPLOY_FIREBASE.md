@@ -20,20 +20,22 @@ No Firebase Console:
 1. Abra **Authentication**.
 2. Clique em **Sign-in method**.
 3. Habilite **Email/Password**.
-4. Opcionalmente, habilite **Google**.
-5. Em **Users**, crie o usuário que será usado para entrar no painel.
+4. Em **Users**, mantenha criada apenas a conta privada já cadastrada para este painel.
+5. Não é necessário habilitar Google para esta versão.
 
-O site não possui cadastro público. Isso evita que qualquer visitante crie uma conta por conta própria.
+A tela pública do painel mostra somente o campo **Senha**. O endereço da conta autorizada não é exibido no formulário nem em texto legível no HTML.
+
+A senha não fica armazenada no repositório. Ela é validada diretamente pelo Firebase Authentication.
 
 ## 3. Firestore
 
-O arquivo `firestore.rules` já limita os dados ao UID autenticado:
+O arquivo `firestore.rules` limita os dados ao UID autenticado e exige login pelo provedor `password`:
 
 ```text
 /users/{uid}/...
 ```
 
-Cada usuário autenticado só consegue acessar os próprios documentos.
+Uma sessão autenticada não consegue ler os documentos de outro UID.
 
 ## 4. Instalar Firebase CLI
 
@@ -75,8 +77,8 @@ users/{uid}/app/state
 
 ## 7. Arquivos principais do Firebase
 
-- `firebase.js`: inicialização do Firebase, Authentication e Firestore.
-- `auth.js`: tela de login usando Firebase Authentication.
+- `firebase.js`: inicialização do Firebase, validação da conta autorizada, Authentication e Firestore.
+- `auth.js`: tela de login privado usando apenas a senha.
 - `cloud-sync.js`: sincronização entre localStorage e Firestore.
 - `firestore.rules`: regras de segurança.
 - `firebase.json`: Hosting + regras do Firestore.
@@ -84,4 +86,6 @@ users/{uid}/app/state
 
 ## Observação de segurança
 
-O `firebaseConfig` e a `apiKey` do aplicativo Web podem ficar no JavaScript do navegador. Eles identificam o projeto, mas **não substituem autenticação nem regras de segurança**. A proteção dos dados é feita pelo Firebase Authentication e por `firestore.rules`.
+O `firebaseConfig` e a `apiKey` do aplicativo Web podem ficar no JavaScript do navegador. Eles identificam o projeto, mas não concedem acesso aos dados.
+
+O e-mail autorizado foi retirado da interface e não aparece como texto simples nos arquivos principais. Ainda assim, como Firebase Hosting entrega código JavaScript ao navegador, nenhuma informação usada pelo cliente deve ser tratada como segredo absoluto. A proteção real continua sendo o Firebase Authentication e as regras do Firestore.
