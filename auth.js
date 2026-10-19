@@ -1,94 +1,143 @@
+/* Login real via Firebase Authentication. Nenhuma senha fica no código do site. */
 (() => {
-  const EXPECTED_HASH = "5a3b5b4be8e4cb50361ae8a19bcfc470c213972be8aa5b2ec828b05e243deb15";
-  const SESSION_KEY = "cgu3_authenticated_v1";
-  const ATTEMPT_KEY = "cgu3_auth_attempts_v1";
-  const BLOCK_KEY = "cgu3_auth_block_until_v1";
-
   const gate = document.getElementById("authGate");
   const form = document.getElementById("authForm");
-  const input = document.getElementById("authPassword");
+  const email = document.getElementById("authEmail");
+  const password = document.getElementById("authPassword");
   const error = document.getElementById("authError");
   const button = document.getElementById("authButton");
+  const googleButton = document.getElementById("googleAuthButton");
   const toggle = document.getElementById("toggleAuthPassword");
 
-  function unlock() {
-    sessionStorage.setItem(SESSION_KEY, "1");
-    document.body.classList.remove("auth-locked");
-    gate.hidden = true;
-    input.value = "";
-  }
-
-  function lockMessage() {
-    const until = Number(localStorage.getItem(BLOCK_KEY) || 0);
-    const now = Date.now();
-    if (until > now) {
-      const sec = Math.ceil((until - now) / 1000);
-      error.textContent = `Muitas tentativas. Aguarde ${sec}s.`;
-      button.disabled = true;
-      setTimeout(lockMessage, 1000);
-      return true;
+  function setBusy(busy, text) {
+    if (button) {
+      button.disabled = !!busy;
+      button.textContent = text || (busy ? "Entrando..." : "Entrar");
     }
-    button.disabled = false;
-    return false;
+    if (googleButton) googleButton.disabled = !!busy;
   }
 
-  async function sha256(text) {
-    const data = new TextEncoder().encode(text);
-    const digest = await crypto.subtle.digest("SHA-256", data);
-    return Array.from(new Uint8Array(digest)).map(b => b.toString(16).padStart(2,"0")).join("");
-  }
-
-  async function validatePassword(value) {
-    if (!window.crypto || !crypto.subtle) {
-      error.textContent = "Este navegador não oferece o recurso seguro necessário. Abra a página via HTTPS.";
-      return false;
-    }
-    return (await sha256(value)) === EXPECTED_HASH;
-  }
-
-  if (sessionStorage.getItem(SESSION_KEY) === "1") {
+  function unlock(user) {
     document.body.classList.remove("auth-locked");
-    gate.hidden = true;
-  } else {
-    setTimeout(() => input.focus(), 60);
-    lockMessage();
+    if (gate) gate.hidden = true;
+    if (password) password.value = "";
+    renderFirebaseUser(user);
   }
 
-  toggle.addEventListener("click", () => {
-    input.type = input.type === "password" ? "text" : "password";
-    toggle.textContent = input.type === "password" ? "◉" : "◎";
-    input.focus();
+  function lock() {
+    document.body.classList.add("auth-locked");
+    if (gate) gate.hidden = false;
+    setBusy(false, "Entrar");
+    setTimeout(() => email && email.focus(), 80);
+  }
+
+  function friendlyError(err) {
+    const code = err && err.code ? err.code : "";
+    if (code === "auth/invalid-email") return "E-mail inválido.";
+    if (code === "auth/missing-password") return "Informe a senha.";
+    if (code === "auth/invalid-credential" || code === "auth/wrong-password" || code === "auth/user-not-found") return "E-mail ou senha inválidos.";
+    if (code === "auth/too-many-requests") return "Muitas tentativas. Aguarde alguns minutos e tente novamente.";
+    if (code === "auth/popup-closed-by-user") return "Login com Google cancelado.";
+    if (code === "auth/popup-blocked") return "O navegador bloqueou a janela do Google. Libere pop-ups e tente novamente.";
+    if (code === "auth/operation-not-allowed") return "Este método de login ainda não foi habilitado no Firebase Authentication.";
+    return "Não foi possível entrar. Confira o Firebase Authentication e tente novamente.";
+  }
+
+  function renderFirebaseUser(user) {
+    const sidebar = document.querySelector(".sidebar-scroll") || document.querySelector(".sidebar");
+    if (!sidebar) return;
+    let box = document.getElementById("firebaseUserBox");
+    if (!box) {
+      box = document.createElement("div");
+      box.id = "firebaseUserBox";
+      box.className = "firebase-user-box";
+      const backup = sidebar.querySelector(".backup");
+      if (backup) backup.insertAdjacentElement("beforebegin", box);
+      else sidebar.appendChild(box);
+    }
+    if (!user) {
+      box.innerHTML = "";
+      return;
+    }
+    const label = user.displayName || user.email || "Usuário autenticado";
+    box.innerHTML = `
+      <div class="firebase-user-title">☁ Firebase</div>
+      <div class="firebase-user-email">${escapeAuth(label)}</div>
+      <div id="cloudStatus" class="firebase-cloud-status">Conectando...</div>
+      <button type="button" id="firebaseLogout">Sair</button>
+    `;
+    document.getElementById("firebaseLogout")?.addEventListener("click", async () => {
+      try { await window.FirebaseCGU.signOut(); } catch (e) { console.error(e); }
+    });
+  }
+
+  function escapeAuth(value) {
+    return String(value || "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]));
+  }
+
+  window.addEventListener("cgu-cloud-status", ev => {
+    const el = document.getElementById("cloudStatus");
+    if (!el) return;
+    const detail = ev.detail || {};
+    el.textContent = detail.message || "Firebase";
+    el.dataset.status = detail.status || "";
   });
 
-  form.addEventListener("submit", async (ev) => {
-    ev.preventDefault();
-    if (lockMessage()) return;
-    button.disabled = true;
-    error.textContent = "Verificando...";
+  if (toggle && password) {
+    toggle.addEventListener("click", () => {
+      password.type = password.type === "password" ? "text" : "password";
+      toggle.textContent = password.type === "password" ? "◉" : "◎";
+      password.focus();
+    });
+  }
+
+  if (form) {
+    form.addEventListener("submit", async ev => {
+      ev.preventDefault();
+      if (!window.FirebaseCGU) return;
+      error.textContent = "";
+      setBusy(true, "Entrando...");
+      try {
+        await window.FirebaseCGU.signInEmail(email.value, password.value);
+      } catch (err) {
+        error.textContent = friendlyError(err);
+        setBusy(false, "Entrar");
+      }
+    });
+  }
+
+  if (googleButton) {
+    googleButton.addEventListener("click", async () => {
+      error.textContent = "";
+      setBusy(true, "Abrindo Google...");
+      try {
+        await window.FirebaseCGU.signInGoogle();
+      } catch (err) {
+        error.textContent = friendlyError(err);
+        setBusy(false, "Entrar");
+      }
+    });
+  }
+
+  async function init() {
+    if (!window.FirebaseCGU) {
+      if (error) error.textContent = "Firebase não foi carregado.";
+      return;
+    }
     try {
-      const ok = await validatePassword(input.value);
-      if (ok) {
-        localStorage.removeItem(ATTEMPT_KEY);
-        localStorage.removeItem(BLOCK_KEY);
-        error.textContent = "";
-        unlock();
-        return;
-      }
-      const attempts = Number(localStorage.getItem(ATTEMPT_KEY) || 0) + 1;
-      localStorage.setItem(ATTEMPT_KEY, String(attempts));
-      input.value = "";
-      if (attempts >= 5) {
-        localStorage.setItem(BLOCK_KEY, String(Date.now() + 30000));
-        localStorage.setItem(ATTEMPT_KEY, "0");
-        lockMessage();
-      } else {
-        error.textContent = `Senha incorreta. Tentativa ${attempts} de 5.`;
-        button.disabled = false;
-        input.focus();
-      }
-    } catch (e) {
-      error.textContent = "Não foi possível validar a senha. Abra a página via HTTPS.";
-      button.disabled = false;
+      await window.FirebaseCGU.ready;
+      window.FirebaseCGU.onUser(user => {
+        if (user) unlock(user);
+        else {
+          renderFirebaseUser(null);
+          lock();
+        }
+      });
+    } catch (err) {
+      if (error) error.textContent = "Falha ao conectar ao Firebase. Verifique sua internet e a configuração do projeto.";
+      lock();
     }
-  });
+  }
+
+  init();
 })();
