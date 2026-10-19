@@ -1,0 +1,20 @@
+/* Firebase Authentication / sync UI */
+.auth-field{margin-top:10px}
+.auth-field label{display:block;margin:0 0 5px;font-size:10px;font-weight:900;color:#475569;text-transform:uppercase;letter-spacing:.35px}
+.auth-field:first-of-type{margin-top:0}
+.auth-google{width:100%;margin-top:8px;border:1px solid #cbd5e1;border-radius:11px;padding:11px 12px;background:#fff;color:#17365D;font-weight:900;cursor:pointer}
+.auth-google:hover{background:#f8fafc}
+.auth-google:disabled{opacity:.55;cursor:not-allowed}
+.firebase-user-box{margin:14px 0 6px;padding:10px;border:1px solid rgba(255,255,255,.16);border-radius:10px;background:rgba(255,255,255,.06)}
+.firebase-user-title{font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:.5px;color:#dbeafe}
+.firebase-user-email{font-size:11px;font-weight:800;color:#fff;margin-top:4px;overflow-wrap:anywhere}
+.firebase-cloud-status{font-size:9px;color:#bfdbfe;margin-top:5px;line-height:1.35}
+.firebase-cloud-status[data-status="error"]{color:#fecaca}
+.firebase-cloud-status[data-status="syncing"]{color:#fde68a}
+.firebase-cloud-status[data-status="online"]{color:#bbf7d0}
+.firebase-user-box button{width:100%;margin-top:8px;border:1px solid rgba(255,255,255,.2);border-radius:8px;padding:7px;background:rgba(255,255,255,.06);color:#fff;font-size:10px;font-weight:900;cursor:pointer}
+.firebase-user-box button:hover{background:rgba(255,255,255,.12)}
+@media(max-width:560px){
+  .auth-card{width:min(430px,100%)}
+  .auth-input{font-size:16px}
+}
