@@ -13,29 +13,35 @@ cd plancgu
 
 Ou baixe o ZIP pelo GitHub e extraia em uma pasta.
 
-## 2. Habilitar autenticação no Firebase
+## 2. Autenticação
 
 No Firebase Console:
 
 1. Abra **Authentication**.
 2. Clique em **Sign-in method**.
 3. Habilite **Email/Password**.
-4. Em **Users**, mantenha criada apenas a conta privada já cadastrada para este painel.
-5. Não é necessário habilitar Google para esta versão.
+4. Em **Users**, mantenha criada a conta privada do painel.
+5. Não é necessário habilitar Google nesta versão.
 
-A tela pública do painel mostra somente o campo **Senha**. O endereço da conta autorizada não é exibido no formulário nem em texto legível no HTML.
+A tela pública do painel mostra somente o campo **Senha**. O endereço da conta autorizada não é exibido no formulário.
 
 A senha não fica armazenada no repositório. Ela é validada diretamente pelo Firebase Authentication.
 
-## 3. Firestore
+## 3. Firestore — acesso single-user
 
-O arquivo `firestore.rules` limita os dados ao UID autenticado e exige login pelo provedor `password`:
+O Firestore está travado diretamente no UID autorizado:
 
 ```text
-/users/{uid}/...
+V8uLmGwlxUVnHUjr5IDm5wjEp542
 ```
 
-Uma sessão autenticada não consegue ler os documentos de outro UID.
+Além disso, a regra exige autenticação pelo provedor `password` e permite acesso somente ao próprio caminho:
+
+```text
+users/{uid}/...
+```
+
+Qualquer outro UID autenticado continua sem permissão de leitura ou gravação.
 
 ## 4. Instalar Firebase CLI
 
@@ -66,26 +72,26 @@ deploy-firebase.bat
 - **Firestore**: fonte compartilhada entre computador e celular.
 - **localStorage**: cache local e contingência quando a conexão não estiver disponível.
 - No primeiro login, se o Firestore ainda estiver vazio, o progresso já existente no navegador é enviado para a nuvem.
-- Se já existir progresso no Firestore e o navegador ainda não estiver vinculado àquela conta, a versão da nuvem prevalece para evitar sobrescrever dados por engano.
+- Se já existir progresso no Firestore e o navegador ainda não estiver vinculado à conta, a versão da nuvem prevalece para evitar sobrescrever dados por engano.
 - Depois da primeira sincronização, as alterações são gravadas automaticamente no Firestore.
 
 O estado principal é salvo no documento:
 
 ```text
-users/{uid}/app/state
+users/V8uLmGwlxUVnHUjr5IDm5wjEp542/app/state
 ```
 
 ## 7. Arquivos principais do Firebase
 
-- `firebase.js`: inicialização do Firebase, validação da conta autorizada, Authentication e Firestore.
+- `firebase.js`: inicialização do Firebase, validação pelo UID autorizado, Authentication e Firestore.
 - `auth.js`: tela de login privado usando apenas a senha.
 - `cloud-sync.js`: sincronização entre localStorage e Firestore.
-- `firestore.rules`: regras de segurança.
+- `firestore.rules`: regra de segurança travada ao UID autorizado.
 - `firebase.json`: Hosting + regras do Firestore.
 - `.firebaserc`: projeto padrão `cgu-plan`.
 
 ## Observação de segurança
 
-O `firebaseConfig` e a `apiKey` do aplicativo Web podem ficar no JavaScript do navegador. Eles identificam o projeto, mas não concedem acesso aos dados.
+O `firebaseConfig`, a API key Web e o UID podem ser públicos no cliente sem conceder acesso à conta. Eles não substituem a senha nem um token autenticado.
 
-O e-mail autorizado foi retirado da interface e não aparece como texto simples nos arquivos principais. Ainda assim, como Firebase Hosting entrega código JavaScript ao navegador, nenhuma informação usada pelo cliente deve ser tratada como segredo absoluto. A proteção real continua sendo o Firebase Authentication e as regras do Firestore.
+A proteção efetiva dos dados é feita em duas camadas: Firebase Authentication e regras do Firestore. Mesmo que alguém altere o JavaScript no navegador, o Firestore rejeita uma sessão cujo UID seja diferente do autorizado.
