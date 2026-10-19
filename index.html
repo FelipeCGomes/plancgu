@@ -5,34 +5,28 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>CGU Cargo 3 — Edital Verticalizado por Prioridade</title>
 <link rel="stylesheet" href="styles.css">
-<link rel="stylesheet" href="firebase.css?v=20261019-1">
+<link rel="stylesheet" href="firebase.css?v=20261019-2">
 </head>
 <body class="auth-locked">
 
 <div id="authGate" role="dialog" aria-modal="true" aria-labelledby="authTitle">
   <div class="auth-card">
     <div class="auth-logo">CGU 2026 · Firebase</div>
-    <h2 id="authTitle">Acesso ao plano de estudos</h2>
-    <p>Entre com um usuário do Firebase Authentication. O progresso será sincronizado entre computador e celular.</p>
+    <h2 id="authTitle">Acesso privado ao plano de estudos</h2>
+    <p>Digite somente a senha da conta autorizada. O endereço de acesso não é exibido nesta tela.</p>
     <form id="authForm" autocomplete="on">
-      <div class="auth-field">
-        <label for="authEmail">E-mail</label>
-        <input id="authEmail" class="auth-input" type="email" inputmode="email"
-               autocomplete="username" placeholder="seuemail@exemplo.com" required>
-      </div>
       <div class="auth-field">
         <label for="authPassword">Senha</label>
         <div class="auth-input-wrap">
           <input id="authPassword" class="auth-input" type="password"
-                 autocomplete="current-password" placeholder="Senha do Firebase" required>
+                 autocomplete="current-password" placeholder="Senha de acesso" required>
           <button type="button" class="auth-show" id="toggleAuthPassword" aria-label="Mostrar ou ocultar senha">◉</button>
         </div>
       </div>
       <button class="auth-button" id="authButton" type="submit">Entrar</button>
-      <button class="auth-google" id="googleAuthButton" type="button">Entrar com Google</button>
       <div class="auth-error" id="authError" aria-live="polite"></div>
     </form>
-    <div class="auth-note">A senha não fica no código-fonte. Habilite Email/Senha e/ou Google em Firebase Console → Authentication → Sign-in method.</div>
+    <div class="auth-note">A senha nunca fica gravada no código. O acesso usa Firebase Authentication e os dados permanecem protegidos pelas regras do Firestore.</div>
   </div>
 </div>
 
@@ -136,8 +130,8 @@
 </div>
 <div class="toast" id="toast"></div>
 
-<script src="firebase.js?v=20261019-1" defer></script>
-<script src="auth.js?v=20261019-1" defer></script>
+<script src="firebase.js?v=20261019-2" defer></script>
+<script src="auth.js?v=20261019-2" defer></script>
 <script src="data-p1.js" defer></script>
 <script src="data-p2.js" defer></script>
 <script src="data-p3.js" defer></script>
