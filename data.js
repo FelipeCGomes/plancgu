@@ -1,0 +1,1 @@
+const EDITAL=[...EDITAL_P1,...EDITAL_P2,...EDITAL_P3];
