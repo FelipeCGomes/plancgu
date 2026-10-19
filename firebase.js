@@ -13,9 +13,7 @@
   };
 
   const SDK = "13.0.0";
-
-  // SHA-256 do e-mail autorizado. O endereço em si não fica exposto como string no código.
-  const ALLOWED_EMAIL_HASH = "2c63bb36f75ebba101b6513bca5fc74fda0b5abcd54ea90767457193e7e22126";
+  const ALLOWED_UID = "V8uLmGwlxUVnHUjr5IDm5wjEp542";
 
   // O Firebase Auth por e-mail/senha precisa receber o endereço em tempo de execução.
   // Os bytes abaixo evitam exposição casual em texto claro, mas NÃO devem ser tratados como segredo criptográfico.
@@ -40,15 +38,8 @@
     return new TextDecoder().decode(new Uint8Array(PRIVATE_LOGIN_BYTES));
   }
 
-  async function sha256(text) {
-    const bytes = new TextEncoder().encode(String(text || "").trim().toLowerCase());
-    const digest = await crypto.subtle.digest("SHA-256", bytes);
-    return Array.from(new Uint8Array(digest)).map(b => b.toString(16).padStart(2, "0")).join("");
-  }
-
   async function isAllowedUser(user) {
-    if (!user || !user.email || !window.crypto || !crypto.subtle) return false;
-    return (await sha256(user.email)) === ALLOWED_EMAIL_HASH;
+    return !!user && user.uid === ALLOWED_UID;
   }
 
   function notifyUser(user) {
