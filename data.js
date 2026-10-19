@@ -11,7 +11,7 @@ const EDITAL=[...EDITAL_P1,...EDITAL_P2,...EDITAL_P3];
     document.head.appendChild(link);
   }
   addCss("adaptive.css?v=20261019-3","adaptiveCss");
-  addCss("menu.css?v=20261019-1","menuCss");
+  addCss("menu.css?v=20261019-2","menuCss");
 
   window.addEventListener("load",()=>{
     if(!document.querySelector('script[data-performance="1"]')){
@@ -23,7 +23,7 @@ const EDITAL=[...EDITAL_P1,...EDITAL_P2,...EDITAL_P3];
 
     if(!document.querySelector('script[data-menu="1"]')){
       const m=document.createElement("script");
-      m.src="menu.js?v=20261019-1";
+      m.src="menu.js?v=20261019-2";
       m.dataset.menu="1";
       document.body.appendChild(m);
     }
