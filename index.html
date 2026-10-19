@@ -5,24 +5,34 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>CGU Cargo 3 — Edital Verticalizado por Prioridade</title>
 <link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="firebase.css?v=20261019-1">
 </head>
 <body class="auth-locked">
 
 <div id="authGate" role="dialog" aria-modal="true" aria-labelledby="authTitle">
   <div class="auth-card">
-    <div class="auth-logo">CGU 2026 · Área pessoal</div>
-    <h2 id="authTitle">Acesso protegido</h2>
-    <p>Digite sua senha para abrir o painel de estudos.</p>
-    <form id="authForm" autocomplete="off">
-      <div class="auth-input-wrap">
-        <input id="authPassword" class="auth-input" type="password" inputmode="text"
-               autocomplete="current-password" placeholder="Senha de acesso" aria-label="Senha de acesso">
-        <button type="button" class="auth-show" id="toggleAuthPassword" aria-label="Mostrar ou ocultar senha">◉</button>
+    <div class="auth-logo">CGU 2026 · Firebase</div>
+    <h2 id="authTitle">Acesso ao plano de estudos</h2>
+    <p>Entre com um usuário do Firebase Authentication. O progresso será sincronizado entre computador e celular.</p>
+    <form id="authForm" autocomplete="on">
+      <div class="auth-field">
+        <label for="authEmail">E-mail</label>
+        <input id="authEmail" class="auth-input" type="email" inputmode="email"
+               autocomplete="username" placeholder="seuemail@exemplo.com" required>
+      </div>
+      <div class="auth-field">
+        <label for="authPassword">Senha</label>
+        <div class="auth-input-wrap">
+          <input id="authPassword" class="auth-input" type="password"
+                 autocomplete="current-password" placeholder="Senha do Firebase" required>
+          <button type="button" class="auth-show" id="toggleAuthPassword" aria-label="Mostrar ou ocultar senha">◉</button>
+        </div>
       </div>
       <button class="auth-button" id="authButton" type="submit">Entrar</button>
+      <button class="auth-google" id="googleAuthButton" type="button">Entrar com Google</button>
       <div class="auth-error" id="authError" aria-live="polite"></div>
     </form>
-    <div class="auth-note">A senha não fica gravada em texto aberto no arquivo. Este bloqueio protege contra acesso casual; páginas estáticas do GitHub Pages não oferecem autenticação de servidor.</div>
+    <div class="auth-note">A senha não fica no código-fonte. Habilite Email/Senha e/ou Google em Firebase Console → Authentication → Sign-in method.</div>
   </div>
 </div>
 
@@ -46,7 +56,7 @@
 </aside>
 
 <div class="main">
-  <div class="topbar"><h1 id="topTitle">Visão geral</h1><div class="top-meta">Uma única base de dados: alterou em um lugar, reflete em todos.</div></div>
+  <div class="topbar"><h1 id="topTitle">Visão geral</h1><div class="top-meta">Firebase + cache local: atualizou em um dispositivo, sincroniza nos demais.</div></div>
 
   <section class="page active" id="page-dashboard">
     <div class="hero">
@@ -126,7 +136,8 @@
 </div>
 <div class="toast" id="toast"></div>
 
-<script src="auth.js" defer></script>
+<script src="firebase.js?v=20261019-1" defer></script>
+<script src="auth.js?v=20261019-1" defer></script>
 <script src="data-p1.js" defer></script>
 <script src="data-p2.js" defer></script>
 <script src="data-p3.js" defer></script>
@@ -134,6 +145,7 @@
 <script src="lessons.js" defer></script>
 <script src="app-core.js" defer></script>
 <script src="history.js" defer></script>
+<script src="cloud-sync.js?v=20261019-1" defer></script>
 <script src="app-ui.js" defer></script>
 </body>
 </html>
