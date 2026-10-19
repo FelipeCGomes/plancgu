@@ -36,7 +36,7 @@
   <div class="exam-box"><b>CEBRASPE • Prova 13/12/2026</b><span id="countdown"></span></div>
   <div class="nav">
     <button class="active" data-page="dashboard" onclick="switchPage('dashboard',this)">📊 Visão geral</button>
-    <button data-page="hoje" onclick="switchPage('hoje',this)">🎯 Aulas do dia · 3h</button>
+    <button data-page="hoje" onclick="switchPage('hoje',this);document.getElementById('topTitle').textContent='Plano de estudo · 3h'">🎯 Plano de estudo · 3h</button>
     <button data-page="edital" onclick="switchPage('edital',this)">📋 Edital por prioridade</button>
     <button data-page="revisar" onclick="switchPage('revisar',this)">🔁 Revisar</button>
   </div>
@@ -78,8 +78,8 @@
   <section class="page" id="page-hoje">
     <div class="hero">
       <div>
-        <h2>Aulas do dia — limite de 3 horas</h2>
-        <p>O plano diário não é um cronograma fixo. Ele pega as próximas aulas úteis pela prioridade, respeita o que já foi concluído e reserva tempo para questões e revisão ativa.</p>
+        <h2>Plano de estudo do dia — 3 horas</h2>
+        <p>Este é o seu plano de estudo adaptativo. O sistema escolhe o próximo conteúdo com base em prioridade, desempenho, questões já feitas e necessidade de revisão. A matéria só muda depois que você conclui o bloco e registra as questões.</p>
       </div>
       <div class="daily-date">
         <label class="small"><b>Ver dia:</b></label>
@@ -88,26 +88,26 @@
     </div>
 
     <div class="study-budget">
-      <div class="budget-item"><span class="small">Aulas Gran</span><b>2h00</b><span class="small">máximo de vídeo por dia</span></div>
-      <div class="budget-item"><span class="small">Questões Cebraspe</span><b>45 min</b><span class="small">após as aulas do tema</span></div>
+      <div class="budget-item"><span class="small">Aulas Gran</span><b>2h00</b><span class="small">ajustado automaticamente pelo desempenho</span></div>
+      <div class="budget-item"><span class="small">Questões Cebraspe</span><b>45 min</b><span class="small">mínimo definido pelo nível do tópico</span></div>
       <div class="budget-item"><span class="small">Revisão ativa</span><b>15 min</b><span class="small">erros, resumo e pontos-chave</span></div>
     </div>
 
     <div class="day-plan">
       <div class="today-card">
-        <h3 id="todayTitle">Aulas recomendadas</h3>
+        <h3 id="todayTitle">O que estudar hoje</h3>
         <div id="todayLessons"></div>
       </div>
       <div class="today-card">
-        <h3>Roteiro das 3 horas</h3>
+        <h3>Distribuição das 3 horas</h3>
         <div id="todayRoutine"></div>
         <div id="todayRelease"></div>
       </div>
     </div>
 
     <div class="card">
-      <h3>Como o sistema escolhe</h3>
-      <p class="small" style="margin:0">1) P3 liberado após 21/10 entra primeiro, porque vale mais e alimenta o estudo de caso. 2) Depois vêm Auditoria/CGU, Governança/Riscos, LAI/LGPD e os pontos fracos de P1. 3) Aula marcada como assistida sai da fila. 4) Alterações no Edital/Revisar continuam usando a mesma base de progresso.</p>
+      <h3>Como o plano adaptativo decide</h3>
+      <p class="small" style="margin:0">1) Prioriza P3 e conteúdos de maior retorno. 2) Reforça assuntos abaixo da meta líquida. 3) Exige um mínimo de questões antes de liberar outra matéria. 4) Usa seus resultados para recalcular o próximo foco. 5) Tudo é sincronizado com o mesmo progresso do Dashboard, Edital e Revisar.</p>
     </div>
   </section>
 
