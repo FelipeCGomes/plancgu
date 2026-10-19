@@ -11,7 +11,7 @@ const EDITAL=[...EDITAL_P1,...EDITAL_P2,...EDITAL_P3];
     document.head.appendChild(link);
   }
   addCss("adaptive.css?v=20261019-3","adaptiveCss");
-  addCss("menu.css?v=20261019-2","menuCss");
+  addCss("menu.css?v=20261019-3","menuCss");
 
   window.addEventListener("load",()=>{
     if(!document.querySelector('script[data-performance="1"]')){
