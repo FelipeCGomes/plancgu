@@ -1,6 +1,9 @@
 /* Controles da tela Aulas do dia - fluxo adaptativo */
 .lesson-question-box{margin-top:10px;padding:11px;border:1px solid #dbe4f0;border-radius:10px;background:#f8fafc}
-.lesson-question-title{font-size:11px;font-weight:900;color:#17365D;margin-bottom:7px}
+.lesson-question-head{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-bottom:7px}
+.lesson-question-title{font-size:11px;font-weight:900;color:#17365D;margin:0}
+.min-question-badge{display:inline-flex;align-items:center;padding:5px 8px;border-radius:999px;background:#fff3cd;color:#8a5a00;border:1px solid #f3d782;font-size:10px;font-weight:900}
+.min-question-help{font-size:10px;line-height:1.45;color:#475569;margin:0 0 8px}
 .lesson-question-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr)) auto;gap:7px;align-items:end}
 .lesson-question-grid label{display:block;font-size:9px;font-weight:800;text-transform:uppercase;color:#6b7280;margin-bottom:4px}
 .lesson-question-grid input{width:100%;min-width:0;border:1px solid #cbd5e1;border-radius:8px;padding:8px;background:#fff}
@@ -19,7 +22,9 @@
   .lesson-question-grid button{grid-column:1/-1;width:100%}
 }
 @media(max-width:420px){
+  .lesson-question-head{align-items:flex-start;flex-direction:column}
   .lesson-question-grid{grid-template-columns:1fr}
   .lesson-question-grid button{grid-column:auto}
   .question-registered{font-size:11px}
+  .min-question-badge{font-size:11px}
 }
