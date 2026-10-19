@@ -48,6 +48,19 @@
     }
   }
 
+  function resetLocalForDifferentUser() {
+    applyingCloud = true;
+    persistLocalSnapshot({
+      version: 5,
+      state: {},
+      settings: { ...DEFAULT_META },
+      lessonState: {},
+      adaptiveFlow: null
+    }, Date.now());
+    applyingCloud = false;
+    if (typeof renderAll === "function") renderAll();
+  }
+
   save = function(silent = true) {
     baseSave(silent);
     const now = Date.now();
@@ -65,9 +78,13 @@
       const remote = await window.FirebaseCGU.readState();
       const boundUser = localStorage.getItem(CLOUD_USER_KEY);
       const localTimestamp = Number(localStorage.getItem(CLOUD_META_KEY) || 0);
+      const switchingUser = !!boundUser && boundUser !== user.uid;
 
       if (!remote) {
-        const now = localTimestamp || Date.now();
+        if (switchingUser) {
+          resetLocalForDifferentUser();
+        }
+        const now = switchingUser ? Date.now() : (localTimestamp || Date.now());
         await window.FirebaseCGU.writeState(snapshotForCloud(now));
         localStorage.setItem(CLOUD_USER_KEY, user.uid);
         localStorage.setItem(CLOUD_META_KEY, String(now));
