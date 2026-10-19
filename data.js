@@ -35,7 +35,7 @@ const EDITAL=[...EDITAL_P1,...EDITAL_P2,...EDITAL_P3];
       s.onload=()=>{
         if(document.querySelector('script[data-study-ui="1"]'))return;
         const u=document.createElement("script");
-        u.src="study-ui.js?v=20261019-1";
+        u.src="study-ui.js?v=20261019-2";
         u.dataset.studyUi="1";
         document.body.appendChild(u);
       };
