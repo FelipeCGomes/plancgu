@@ -33,6 +33,7 @@ const EDITAL=[...EDITAL_P1,...EDITAL_P2,...EDITAL_P3];
       await loadScript("consistency.js?v=20261020-1","consistency");
       await loadScript("atomic-ui.js?v=20261020-1","atomicUi");
       await loadScript("planner-v2.js?v=20261020-1","plannerV2");
+      await loadScript("planner-reconcile.js?v=20261020-1","plannerReconcile");
       if(typeof renderAll==="function")renderAll();
     }catch(e){
       console.error("Falha ao carregar módulos do painel:",e);
