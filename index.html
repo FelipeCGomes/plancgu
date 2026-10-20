@@ -4,8 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>CGU Cargo 3 — Edital Verticalizado por Prioridade</title>
-<link rel="stylesheet" href="styles.css?v=20261019-5">
-<link rel="stylesheet" href="firebase.css?v=20261019-2">
+<link rel="stylesheet" href="styles.css?v=20261020-1">
+<link rel="stylesheet" href="firebase.css?v=20261020-1">
 </head>
 <body class="auth-locked">
 
@@ -18,8 +18,7 @@
       <div class="auth-field">
         <label for="authPassword">Senha</label>
         <div class="auth-input-wrap">
-          <input id="authPassword" class="auth-input" type="password"
-                 autocomplete="current-password" placeholder="Senha de acesso" required>
+          <input id="authPassword" class="auth-input" type="password" autocomplete="current-password" placeholder="Senha de acesso" required>
           <button type="button" class="auth-show" id="toggleAuthPassword" aria-label="Mostrar ou ocultar senha">◉</button>
         </div>
       </div>
@@ -50,11 +49,11 @@
 </aside>
 
 <div class="main">
-  <div class="topbar"><h1 id="topTitle">Visão geral</h1><div class="top-meta">Firebase + cache local: atualizou em um dispositivo, sincroniza nos demais.</div></div>
+  <div class="topbar"><h1 id="topTitle">Visão geral</h1><div class="top-meta">Firebase + cache local: uma única base para Plano, Edital, Dashboard e Revisar.</div></div>
 
   <section class="page active" id="page-dashboard">
     <div class="hero">
-      <div><h2>Foco no que mais pontua</h2><p>Sem cronograma fixo. O painel organiza o edital por prioridade, acompanha desempenho líquido Cebraspe e envia automaticamente para <b>Revisar</b> tudo o que ficar abaixo da meta.</p></div>
+      <div><h2>Foco no que mais pontua</h2><p>O painel acompanha cada subitem do edital separadamente, considera prioridade Cebraspe/CGU, desempenho líquido e necessidade de revisão.</p></div>
       <div><span class="badge p3">P3 ≈ 69,6% estratégico</span></div>
     </div>
     <div class="kpis" id="kpis"></div>
@@ -70,7 +69,7 @@
           <div class="setting"><b>P2</b><div class="small">Complementares + discursiva</div><input id="metaP2" type="number" min="0" max="100" onchange="updateSetting('P2',this.value)">%</div>
           <div class="setting"><b>P3</b><div class="small">Específicos + estudo de caso</div><input id="metaP3" type="number" min="0" max="100" onchange="updateSetting('P3',this.value)">%</div>
         </div>
-        <p class="small" style="margin:12px 0 0">As metas são globais. Alterou aqui, todos os tópicos, status e a aba Revisar são recalculados automaticamente.</p>
+        <p class="small" style="margin:12px 0 0">As metas são globais. Todos os temas, status e a aba Revisar são recalculados automaticamente.</p>
       </div>
     </div>
   </section>
@@ -79,7 +78,7 @@
     <div class="hero">
       <div>
         <h2>Plano de estudo do dia — 3 horas</h2>
-        <p>Este é o seu plano de estudo adaptativo. O sistema escolhe o próximo conteúdo com base em prioridade, desempenho, questões já feitas e necessidade de revisão. A matéria só muda depois que você conclui o bloco e registra as questões.</p>
+        <p>O plano trabalha por subitem do edital. Cada tema possui prioridade, teoria direcionada e seu próprio grupo de questões. O foco só avança após estudo + questões da rodada.</p>
       </div>
       <div class="daily-date">
         <label class="small"><b>Ver dia:</b></label>
@@ -88,8 +87,8 @@
     </div>
 
     <div class="study-budget">
-      <div class="budget-item"><span class="small">Aulas Gran</span><b>2h00</b><span class="small">ajustado automaticamente pelo desempenho</span></div>
-      <div class="budget-item"><span class="small">Questões Cebraspe</span><b>45 min</b><span class="small">mínimo definido pelo nível do tópico</span></div>
+      <div class="budget-item"><span class="small">Teoria / Gran</span><b>90 min</b><span class="small">ajustado automaticamente pelo desempenho</span></div>
+      <div class="budget-item"><span class="small">Questões Cebraspe</span><b>75 min</b><span class="small">do mesmo subitem do edital</span></div>
       <div class="budget-item"><span class="small">Revisão ativa</span><b>15 min</b><span class="small">erros, resumo e pontos-chave</span></div>
     </div>
 
@@ -106,15 +105,15 @@
     </div>
 
     <div class="card">
-      <h3>Como o plano adaptativo decide</h3>
-      <p class="small" style="margin:0">1) Prioriza P3 e conteúdos de maior retorno. 2) Reforça assuntos abaixo da meta líquida. 3) Exige um mínimo de questões antes de liberar outra matéria. 4) Usa seus resultados para recalcular o próximo foco. 5) Tudo é sincronizado com o mesmo progresso do Dashboard, Edital e Revisar.</p>
+      <h3>Como o plano decide</h3>
+      <p class="small" style="margin:0">1) Cada subitem numerado do edital é um tema independente. 2) Prioriza P3 e assuntos de maior retorno Cebraspe/CGU. 3) Reforça temas abaixo da meta. 4) O calendário mantém um foco próprio para cada data. 5) Qualquer questão registrada alimenta imediatamente Edital, Dashboard e Revisar.</p>
     </div>
   </section>
 
-<section class="page" id="page-edital">
-    <div class="hero"><div><h2>Edital verticalizado por prioridade</h2><p>As matérias e os tópicos são ordenados pelo retorno estratégico para a prova. O texto do edital foi preservado; removi apenas controles antigos que não ajudam diretamente na decisão do que estudar.</p></div></div>
+  <section class="page" id="page-edital">
+    <div class="hero"><div><h2>Edital verticalizado por prioridade</h2><p>Os subitens 1.1, 1.2, 1.3 etc. são acompanhados separadamente, cada um com prioridade, questões, desempenho e status próprios.</p></div></div>
     <div class="filters">
-      <input id="search" placeholder="Buscar matéria ou tópico..." oninput="renderEdital()">
+      <input id="search" placeholder="Buscar matéria, grupo ou subitem..." oninput="renderEdital()">
       <select id="filterExam" onchange="renderEdital()"><option value="">P1 + P2 + P3</option><option>P1</option><option>P2</option><option>P3</option></select>
       <select id="filterPriority" onchange="renderEdital()"><option value="">Todas prioridades</option><option>Crítica</option><option>Alta</option><option>Média</option><option>Baixa</option></select>
       <select id="filterStatus" onchange="renderEdital()"><option value="">Todos status</option><option>Pendente</option><option>Atendeu</option><option>Revisar</option><option>Concluído</option></select>
@@ -123,23 +122,24 @@
   </section>
 
   <section class="page" id="page-revisar">
-    <div class="hero"><div><h2>Revisar</h2><p>Lista automática. Um tópico entra aqui quando possui questões e o % líquido está abaixo da meta da sua prova. Você pode atualizar os números aqui ou no Edital — é a mesma informação.</p></div></div>
+    <div class="hero"><div><h2>Revisar</h2><p>Lista automática por subitem. Um tema entra aqui quando possui questões e o % líquido está abaixo da meta da sua prova.</p></div></div>
     <div id="reviewList"></div>
   </section>
 </div>
 </div>
 <div class="toast" id="toast"></div>
 
-<script src="firebase.js?v=20261019-3" defer></script>
-<script src="auth.js?v=20261019-3" defer></script>
-<script src="data-p1.js?v=20261019-1" defer></script>
-<script src="data-p2.js?v=20261019-1" defer></script>
-<script src="data-p3.js?v=20261019-1" defer></script>
-<script src="data.js?v=20261019-6" defer></script>
-<script src="lessons.js?v=20261019-2" defer></script>
-<script src="app-core.js?v=20261019-2" defer></script>
-<script src="history.js?v=20261019-3" defer></script>
-<script src="cloud-sync.js?v=20261019-3" defer></script>
-<script src="app-ui.js?v=20261019-2" defer></script>
+<script src="firebase.js?v=20261020-1" defer></script>
+<script src="auth.js?v=20261020-1" defer></script>
+<script src="data-p1.js?v=20261020-1" defer></script>
+<script src="data-p2.js?v=20261020-1" defer></script>
+<script src="data-p3.js?v=20261020-1" defer></script>
+<script src="atomic-model.js?v=20261020-1" defer></script>
+<script src="data.js?v=20261020-1" defer></script>
+<script src="lessons.js?v=20261020-1" defer></script>
+<script src="app-core.js?v=20261020-1" defer></script>
+<script src="history.js?v=20261020-1" defer></script>
+<script src="cloud-sync.js?v=20261020-1" defer></script>
+<script src="app-ui.js?v=20261020-1" defer></script>
 </body>
 </html>
