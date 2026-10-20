@@ -74,4 +74,17 @@
       }
     };
   }
+
+  // Repara automaticamente sessões em que o usuário já havia marcado o bloco/aulas
+  // antes desta correção entrar em vigor.
+  try{
+    const currentFlow=typeof readAdaptiveFlow==="function"?readAdaptiveFlow():null;
+    if(currentFlow && typeof adaptiveLessonsDone==="function" && adaptiveLessonsDone(currentFlow)){
+      const topicId=completionTopicId(currentFlow);
+      if(topicId){
+        setStudyCompletion(topicId,true);
+        if(typeof renderAll==="function") renderAll();
+      }
+    }
+  }catch(e){console.warn("Reconciliação de conclusão:",e)}
 })();
