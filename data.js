@@ -35,6 +35,7 @@ const EDITAL=[...EDITAL_P1,...EDITAL_P2,...EDITAL_P3];
       await loadScript("consistency.js?v=20261019-1","consistency");
       await loadScript("question-link.js?v=20261019-1","questionLink");
       await loadScript("flow-sync.js?v=20261019-1","flowSync");
+      await loadScript("completion-sync.js?v=20261019-1","completionSync");
     }catch(e){
       console.error("Falha ao carregar módulos do painel:",e);
     }
