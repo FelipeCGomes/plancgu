@@ -5,7 +5,8 @@
   const subjects=[...EDITAL_P1,...EDITAL_P2,...EDITAL_P3];
   const meta={};
 
-  function slugLocal(s){return String(s||"").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[^a-z0-9]/g,"-").replace(/-+/g,"-").replace(/^-|-$/g,"");}
+  // Deve ser idêntico ao slug() de app-core.js para que todos os módulos apontem para o mesmo topicId.
+  function slugLocal(s){return String(s||"").toLowerCase().replace(/[^a-z0-9]/g,'-').replace(/-+/g,'-');}
   function atomicId(d,g,i){return d.id+"_"+slugLocal(g.nome)+"_"+i;}
 
   function splitAtomic(text){
