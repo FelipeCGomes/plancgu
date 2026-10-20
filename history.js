@@ -17,23 +17,64 @@ function historyTopicId(subjectId,groupName){
   return tid(d,g,0);
 }
 
+function hasQuestionData(v){
+  return Number(v?.questoes)>0 || Number(v?.acertos)>0 || Number(v?.erros)>0 || Number(v?.brancos)>0;
+}
+
+function isLegacyDemocracySeed(v){
+  if(!v)return false;
+  const exact=Number(v.questoes)===20 && Number(v.acertos)===14 && Number(v.erros)===6 && Number(v.brancos||0)===0;
+  const tagged=!!v.historico || String(v.obs||"").includes("Histórico até 18/10") || String(v.obs||"").includes("Princípios Fundamentais");
+  return exact && tagged;
+}
+
+function migrateLegacyHistory(){
+  const subject="estado-democracia-direitos-e-ciencia-politica";
+  const oldId=historyTopicId(subject,"Ordem Constitucional e Direitos");
+  const newId=historyTopicId(subject,"Democracia e Representação");
+  if(!oldId||!newId)return false;
+
+  const old=state[oldId]||{};
+  const dest=state[newId]||{};
+  if(!isLegacyDemocracySeed(old))return false;
+
+  const now=Date.now();
+  if(!hasQuestionData(dest)){
+    state[newId]={
+      ...dest,
+      questoes:20,
+      acertos:14,
+      erros:6,
+      brancos:0,
+      obs:"Histórico até 18/10: Democracia e Representação — 20 questões, 14 acertos e 6 erros (40% líquido Cebraspe).",
+      historico:true,
+      updatedAtMs:now
+    };
+  }
+
+  const cleaned={...old,questoes:0,acertos:0,erros:0,brancos:0,updatedAtMs:now};
+  if(cleaned.historico)delete cleaned.historico;
+  if(String(cleaned.obs||"").includes("Histórico até 18/10") || String(cleaned.obs||"").includes("Princípios Fundamentais"))cleaned.obs="";
+  state[oldId]=cleaned;
+  return true;
+}
+
 function ensureKnownHistory(){
+  let changed=migrateLegacyHistory();
   const seeds=[
     {
-      id:historyTopicId("estado-democracia-direitos-e-ciencia-politica","Ordem Constitucional e Direitos"),
-      values:{questoes:20,acertos:14,erros:6,brancos:0,obs:"Histórico até 18/10: Princípios Fundamentais — 20 questões, 14 acertos e 6 erros (40% líquido Cebraspe).",historico:true}
+      id:historyTopicId("estado-democracia-direitos-e-ciencia-politica","Democracia e Representação"),
+      values:{questoes:20,acertos:14,erros:6,brancos:0,obs:"Histórico até 18/10: Democracia e Representação — 20 questões, 14 acertos e 6 erros (40% líquido Cebraspe).",historico:true}
     },
     {
       id:historyTopicId("computacao-em-nuvem-virtualizacao-e-automacao","Virtualização e Contêineres"),
       values:{questoes:20,acertos:16,erros:2,brancos:2,obs:"Histórico até 18/10: Virtualização — 20 questões, 16 acertos, 2 erros e 2 em branco (80% bruto e 70% líquido Cebraspe).",historico:true}
     }
   ];
-  let changed=false;
   seeds.forEach(({id,values})=>{
     if(!id)return;
     const current=state[id]||{};
-    const hasData=Number(current.questoes)>0 || Number(current.acertos)>0 || Number(current.erros)>0 || Number(current.brancos)>0;
-    if(!hasData){
+    if(!hasQuestionData(current)){
       state[id]={...current,...values,updatedAtMs:Number(current.updatedAtMs)||Date.now()};
       changed=true;
     }
@@ -41,14 +82,13 @@ function ensureKnownHistory(){
   return changed;
 }
 
-// Permite registrar questões em branco sem tratá-las como erro.
 normalizeTopic=function(id){
   const s=getTS(id);
   let q=Math.max(0,Number(s.questoes)||0);
   const a=Math.max(0,Number(s.acertos)||0);
   const b=Math.max(0,Number(s.brancos)||0);
   let e;
-  if(s.erros!==undefined && s.erros!==null) e=Math.max(0,Number(s.erros)||0);
+  if(s.erros!==undefined && s.erros!==null)e=Math.max(0,Number(s.erros)||0);
   else e=Math.max(q-a-b,0);
   if(!q && (a||e||b))q=a+e+b;
   if(q<a+e+b)q=a+e+b;
@@ -90,7 +130,7 @@ load=function(){
   originalLoad();
   const changed=ensureKnownHistory();
   if(changed){
-    try{localStorage.setItem(KEY,JSON.stringify({version:5,state,settings,lessonState}));}catch(e){}
+    try{localStorage.setItem(KEY,JSON.stringify({version:7,state,settings,lessonState}));}catch(e){}
   }
 };
 
