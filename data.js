@@ -1,6 +1,6 @@
 const EDITAL=[...EDITAL_P1,...EDITAL_P2,...EDITAL_P3];
 
-// Carrega os controles e motores em ordem determinística.
+// Carrega os controles em ordem determinística depois da interface base.
 (function(){
   function addCss(href,key){
     if(document.querySelector(`link[data-${key}="1"]`))return;
@@ -23,19 +23,17 @@ const EDITAL=[...EDITAL_P1,...EDITAL_P2,...EDITAL_P3];
     });
   }
 
-  addCss("adaptive.css?v=20261019-4","adaptiveCss");
-  addCss("menu.css?v=20261019-3","menuCss");
+  addCss("adaptive.css?v=20261020-1","adaptiveCss");
+  addCss("menu.css?v=20261020-1","menuCss");
 
   window.addEventListener("load",async()=>{
     try{
-      await loadScript("performance.js?v=20261019-2","performance");
-      await loadScript("menu.js?v=20261019-2","menu");
-      await loadScript("adaptive.js?v=20261019-4","adaptive");
-      await loadScript("study-ui.js?v=20261019-3","studyUi");
-      await loadScript("consistency.js?v=20261019-1","consistency");
-      await loadScript("question-link.js?v=20261019-1","questionLink");
-      await loadScript("flow-sync.js?v=20261019-1","flowSync");
-      await loadScript("completion-sync.js?v=20261019-2","completionSync");
+      await loadScript("performance.js?v=20261020-1","performance");
+      await loadScript("menu.js?v=20261020-1","menu");
+      await loadScript("consistency.js?v=20261020-1","consistency");
+      await loadScript("atomic-ui.js?v=20261020-1","atomicUi");
+      await loadScript("planner-v2.js?v=20261020-1","plannerV2");
+      if(typeof renderAll==="function")renderAll();
     }catch(e){
       console.error("Falha ao carregar módulos do painel:",e);
     }
