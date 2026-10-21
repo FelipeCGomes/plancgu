@@ -36,6 +36,7 @@ const EDITAL=[...EDITAL_P1,...EDITAL_P2,...EDITAL_P3];
       await loadScript("planner-reconcile.js?v=20261020-1","plannerReconcile");
       await loadScript("planner-balance.js?v=20261020-1","plannerBalance");
       await loadScript("planner-carryover.js?v=20261020-2","plannerCarryover");
+      await loadScript("planner-delay.js?v=20261021-1","plannerDelay");
       await loadScript("backup-v2.js?v=20261020-1","backupV2");
       await loadScript("stable-edit.js?v=20261020-1","stableEdit");
       if(typeof renderAll==="function")renderAll();
