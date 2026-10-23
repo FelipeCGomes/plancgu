@@ -3,13 +3,13 @@
    Regra canônica: TOTAL = ACERTOS + ERROS + EM BRANCO.
 */
 (() => {
-  const PLAN_KEY = KEY + "-daily-plans-v1";
   const dirtyEdital = new Set();
 
   function n(v){ return Math.max(0, Number(v) || 0); }
   function canonical(id){
     const raw = getTS(id) || {};
-    let q = n(raw.questoes), a = n(raw.acertos), b = n(raw.brancos);
+    let q = n(raw.questoes), a = n(raw.acertos), b = n(raw.brancos), storedE=n(raw.erros);
+    if(!q && (a || storedE || b)) q = a + storedE + b;
     if(a + b > q) q = a + b;
     const e = Math.max(q - a - b, 0);
     return {raw,q,a,b,e};
@@ -28,14 +28,13 @@
   }
 
   function persistRepair(id, expected, meta={}){
-    const now=Date.now();
     setTS(id,{
       questoes:expected.q,
       acertos:expected.a,
       erros:expected.e,
       brancos:expected.b,
       atomicConfirmed:true,
-      updatedAtMs:now,
+      updatedAtMs:Date.now(),
       ...meta
     });
   }
@@ -80,8 +79,6 @@
     return {host,targetId,q,a,b};
   }
 
-  // Confere o resultado do lançamento do Plano depois que todos os wrappers
-  // (carryover/adiamento/reclassificação) terminarem.
   const baseRegister=window.CGU_registerPlanQuestions;
   if(typeof baseRegister==="function"){
     window.CGU_registerPlanQuestions=function(activeId,ymd){
@@ -94,7 +91,7 @@
       const after=canonical(cap.targetId);
       const afterUpdated=Number(getTS(cap.targetId)?.updatedAtMs)||0;
       const successful=afterUpdated>beforeUpdated || !sameTotals(before,after);
-      if(!successful)return result; // validação do Plano recusou o lançamento.
+      if(!successful)return result;
 
       const batchQ=n(cap.q), batchA=n(cap.a), batchB=n(cap.b);
       if(batchA+batchB>batchQ)return result;
@@ -110,7 +107,6 @@
       });
       try{save();}catch(e){console.warn("Falha ao salvar conferência do lançamento",e);}
 
-      // Recalcula todas as telas a partir do mesmo state[topicId].
       try{renderAll();}catch(e){}
       try{if(typeof renderPerformancePanel==="function")renderPerformancePanel();}catch(e){}
       window.dispatchEvent(new CustomEvent("cgu-question-recorded",{detail:{topicId:cap.targetId,batch:{q:batchQ,a:batchA,e:batchE,b:batchB},mismatch}}));
@@ -119,7 +115,6 @@
     };
   }
 
-  // Mantém a edição do Edital estável, mas garante a mesma equação de dados.
   const baseSetQuestion=setQuestion;
   setQuestion=function(id,field,val){
     const result=baseSetQuestion.apply(this,arguments);
@@ -132,8 +127,6 @@
     return result;
   };
 
-  // Só considera a edição direta do Edital uma "rodada registrada" quando o usuário
-  // sai daquele card; evita o Plano entender o primeiro campo digitado como conclusão.
   document.addEventListener("focusout",ev=>{
     const topic=ev.target?.closest?.("#page-edital .topic[data-topic-id]");
     if(!topic)return;
@@ -180,7 +173,6 @@
     return r;
   };
 
-  // Ajuste visual para 4 campos + botão.
   if(!document.getElementById("integrityStyle")){
     const s=document.createElement("style");s.id="integrityStyle";
     s.textContent=`
@@ -192,7 +184,6 @@
     document.head.appendChild(s);
   }
 
-  // Auditoria inicial e uma segunda auditoria depois que o Firestore terminar de mesclar.
   const initial=auditAll();
   if(initial.repaired)console.warn("CGU: inconsistências numéricas reparadas",initial);
   window.addEventListener("cgu-cloud-ready",()=>{
