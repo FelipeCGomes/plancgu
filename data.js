@@ -39,6 +39,7 @@ const EDITAL=[...EDITAL_P1,...EDITAL_P2,...EDITAL_P3];
       await loadScript("planner-delay.js?v=20261021-1","plannerDelay");
       await loadScript("backup-v2.js?v=20261020-1","backupV2");
       await loadScript("stable-edit.js?v=20261020-1","stableEdit");
+      await loadScript("data-integrity.js?v=20261023-1","dataIntegrity");
       if(typeof renderAll==="function")renderAll();
     }catch(e){
       console.error("Falha ao carregar módulos do painel:",e);
