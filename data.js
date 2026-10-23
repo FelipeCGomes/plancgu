@@ -40,6 +40,7 @@ const EDITAL=[...EDITAL_P1,...EDITAL_P2,...EDITAL_P3];
       await loadScript("backup-v2.js?v=20261020-1","backupV2");
       await loadScript("stable-edit.js?v=20261020-1","stableEdit");
       await loadScript("data-integrity.js?v=20261023-2","dataIntegrity");
+      await loadScript("planner-completion-policy.js?v=20261023-1","plannerCompletionPolicy");
       if(typeof renderAll==="function")renderAll();
     }catch(e){
       console.error("Falha ao carregar módulos do painel:",e);
