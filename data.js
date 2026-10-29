@@ -45,9 +45,11 @@ const EDITAL=[...EDITAL_P1,...EDITAL_P2,...EDITAL_P3];
       await loadScript("planner-intensive.js?v=20261024-2","plannerIntensive");
       await loadScript("edital-timeline.js?v=20261024-1","editalTimeline");
       await loadScript("top6-target.js?v=20261028-1","top6Target");
+      await loadScript("dashboard-overview.js?v=20261028-1","dashboardOverview");
       if(typeof renderAll==="function")renderAll();
       if(typeof window.CGU_renderEditalTimeline==="function")window.CGU_renderEditalTimeline();
       if(typeof window.CGU_renderTop6Target==="function")window.CGU_renderTop6Target();
+      if(typeof window.CGU_optimizeDashboard==="function")window.CGU_optimizeDashboard();
     }catch(e){
       console.error("Falha ao carregar módulos do painel:",e);
     }
