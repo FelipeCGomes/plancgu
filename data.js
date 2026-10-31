@@ -52,12 +52,14 @@ const EDITAL=[...EDITAL_P1,...EDITAL_P2,...EDITAL_P3];
       await loadScript("discursive-type-fix.js?v=20261031-2","discursiveTypeFix");
       await loadScript("discursive-enhancements.js?v=20261031-1","discursiveEnhancements");
       await loadScript("discursive-layout.js?v=20261031-1","discursiveLayout");
+      await loadScript("discursive-summary-fix.js?v=20261031-1","discursiveSummaryFix");
       if(typeof renderAll==="function")renderAll();
       if(typeof window.CGU_renderEditalTimeline==="function")window.CGU_renderEditalTimeline();
       if(typeof window.CGU_optimizeDashboard==="function")window.CGU_optimizeDashboard();
       if(typeof window.CGU_renderObjectiveGoal==="function")window.CGU_renderObjectiveGoal();
       if(typeof window.CGU_renderDiscursiveTracker==="function")window.CGU_renderDiscursiveTracker();
       if(typeof window.CGU_installDiscursiveLayout==="function")window.CGU_installDiscursiveLayout();
+      if(typeof window.CGU_installP4SummaryFix==="function")window.CGU_installP4SummaryFix();
     }catch(e){
       console.error("Falha ao carregar módulos do painel:",e);
     }
