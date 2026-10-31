@@ -1,8 +1,8 @@
 /* Interface da meta objetiva 210–230 pontos.
-   Executa por último para alinhar Dashboard e Plano com a meta definida em objective-goal.js.
+   A meta global da prova é separada dos gatilhos operacionais por tópico.
 */
 (() => {
-  const G=window.CGU_OBJECTIVE_GOAL||{maxPoints:260,floor:210,target:220,stretch:230,floorPct:80.769,targetPct:84.615,stretchPct:88.462,blockMeta:{P1:75,P2:80,P3:88},p4Target:85};
+  const G=window.CGU_OBJECTIVE_GOAL||{maxPoints:260,floor:210,target:220,stretch:230,floorPct:80.769,targetPct:84.615,stretchPct:88.462,blockMeta:{P1:70,P2:75,P3:80},p4Target:85};
 
   function n(v){return Math.max(0,Number(v)||0)}
   function fmt(v,d=1){return v==null||!isFinite(v)?"—":Number(v).toFixed(d).replace('.',',')}
@@ -36,12 +36,12 @@
       <div class="kpi dash-kpi"><div class="v">${s.pct==null?"—":fmt(s.pct,1)+"%"}</div><div class="l">Líquido ponderado atual</div><div class="dash-kpi-detail">Piso 210 = ${fmt(G.floorPct,1)}% · alvo 220 = ${fmt(G.targetPct,1)}%</div></div>
       <div class="kpi dash-kpi"><div class="v">${gapFloor==null?"—":(gapFloor>=0?"+":"")+fmt(gapFloor,1)}</div><div class="l">Gap para 210 pontos</div><div class="dash-kpi-detail">Gap para 220: ${gapTarget==null?"—":(gapTarget>=0?"+":"")+fmt(gapTarget,1)} pts</div></div>
       <div class="kpi dash-kpi"><div class="v">${s.studied}/${s.rows.length}</div><div class="l">Cobertura do edital</div><div class="dash-kpi-detail">${fmt(coverage,1)}% · ${s.q} questões mapeadas</div></div>
-      <div class="kpi dash-kpi ${s.review?"review-alert":""}"><div class="v">${s.review}</div><div class="l">Revisar agora</div><div class="dash-kpi-detail">Meta operacional: P1 ${G.blockMeta.P1}% · P2 ${G.blockMeta.P2}% · P3 ${G.blockMeta.P3}%</div></div>`;
+      <div class="kpi dash-kpi ${s.review?"review-alert":""}"><div class="v">${s.review}</div><div class="l">Revisar agora</div><div class="dash-kpi-detail">Cortes por tópico: P1 ${G.blockMeta.P1}% · P2 ${G.blockMeta.P2}% · P3 ${G.blockMeta.P3}%</div></div>`;
 
     const hero=document.querySelector("#page-dashboard .hero");
     if(hero){
       const badge=hero.querySelector(".badge.p3");if(badge)badge.textContent="🎯 Objetiva: 210–230 pts líquidos";
-      const p=hero.querySelector("p");if(p)p.textContent="Meta central de 220/260 pontos líquidos. O painel projeta sua pontuação pela amostra atual e usa P1 75%, P2 80% e P3 88% como gatilhos operacionais de revisão.";
+      const p=hero.querySelector("p");if(p)p.textContent=`Meta global: 210–230/260 pontos, com alvo central em 220. A revisão por tópico usa cortes operacionais menores (P1 ${G.blockMeta.P1}%, P2 ${G.blockMeta.P2}%, P3 ${G.blockMeta.P3}%) para respeitar a granularidade da pontuação Cebraspe em amostras pequenas.`;
     }
 
     const panel=document.getElementById("performanceVsTarget");
@@ -71,9 +71,9 @@
 
     const metasCard=document.getElementById("metaP1")?.closest(".card");
     if(metasCard){
-      const title=metasCard.querySelector("h3");if(title)title.textContent="Metas operacionais para 220 pontos";
+      const title=metasCard.querySelector("h3");if(title)title.textContent="Metas operacionais por tópico";
       const hint=metasCard.querySelector(".dash-meta-hint");
-      if(hint)hint.innerHTML=`<b>Objetivo:</b> 210–230/260 líquidos, com alvo central em <b>220</b>. <span>P1 ${G.blockMeta.P1}% + P2 ${G.blockMeta.P2}% + P3 ${G.blockMeta.P3}% projetam cerca de <b>220,4 pontos</b>.</span>`;
+      if(hint)hint.innerHTML=`<b>Não são a meta final da prova.</b> Servem apenas como gatilho de revisão por tópico: <b>P1 ${G.blockMeta.P1}% · P2 ${G.blockMeta.P2}% · P3 ${G.blockMeta.P3}%</b>. <span>A meta global continua sendo 210–230/260, avaliada pelo desempenho agregado ponderado.</span>`;
     }
   }
 
@@ -84,7 +84,7 @@
       box=document.createElement("div");box.id="objectiveGoalPlanBox";box.className="objective-goal-plan";
       const hero=page.querySelector(".hero");hero?.insertAdjacentElement("afterend",box);
     }
-    box.innerHTML=`<b>🎯 Meta objetiva: 210–230 pontos líquidos</b><span>Alvo central: <b>220/260</b>. O motor considera P1 ${G.blockMeta.P1}%, P2 ${G.blockMeta.P2}% e P3 ${G.blockMeta.P3}% como metas operacionais; tópicos abaixo desses níveis ganham prioridade de revisão e questões.</span>`;
+    box.innerHTML=`<b>🎯 Meta global da objetiva: 210–230 pontos líquidos</b><span>Alvo central: <b>220/260</b>. Para decidir revisão de um tópico, o motor usa cortes operacionais de P1 ${G.blockMeta.P1}%, P2 ${G.blockMeta.P2}% e P3 ${G.blockMeta.P3}%. Esses cortes não representam a nota final que você precisa obter na prova.</span>`;
   }
 
   if(!document.getElementById("objectiveGoalUiStyle")){
