@@ -28,6 +28,8 @@ const EDITAL=[...EDITAL_P1,...EDITAL_P2,...EDITAL_P3];
 
   window.addEventListener("load",async()=>{
     try{
+      // A meta objetiva precisa ser aplicada antes dos motores de desempenho e planejamento.
+      await loadScript("objective-goal.js?v=20261030-1","objectiveGoal");
       await loadScript("performance.js?v=20261020-1","performance");
       await loadScript("menu.js?v=20261020-1","menu");
       await loadScript("consistency.js?v=20261020-1","consistency");
@@ -44,12 +46,12 @@ const EDITAL=[...EDITAL_P1,...EDITAL_P2,...EDITAL_P3];
       await loadScript("planner-weekend.js?v=20261023-1","plannerWeekend");
       await loadScript("planner-intensive.js?v=20261024-2","plannerIntensive");
       await loadScript("edital-timeline.js?v=20261024-1","editalTimeline");
-      await loadScript("top6-target.js?v=20261028-1","top6Target");
       await loadScript("dashboard-overview.js?v=20261028-1","dashboardOverview");
+      await loadScript("objective-goal-ui.js?v=20261030-1","objectiveGoalUi");
       if(typeof renderAll==="function")renderAll();
       if(typeof window.CGU_renderEditalTimeline==="function")window.CGU_renderEditalTimeline();
-      if(typeof window.CGU_renderTop6Target==="function")window.CGU_renderTop6Target();
       if(typeof window.CGU_optimizeDashboard==="function")window.CGU_optimizeDashboard();
+      if(typeof window.CGU_renderObjectiveGoal==="function")window.CGU_renderObjectiveGoal();
     }catch(e){
       console.error("Falha ao carregar módulos do painel:",e);
     }
