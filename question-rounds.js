@@ -1,5 +1,6 @@
 /* Rodadas de questões por subitem.
    A última rodada representa o desempenho atual; o acumulado serve apenas como histórico/volume.
+   Cada formulário é lido no próprio card para evitar conflito entre Edital e Revisar.
 */
 (() => {
   function n(v){return Math.max(0,Number(v)||0)}
@@ -11,7 +12,6 @@
     e=Math.max(q-a-b,0);
     return {q,a,b,e};
   }
-  function safeId(id){return String(id).replace(/[^a-zA-Z0-9_-]/g,"-")}
   function row(id){return typeof topicsFlat==="function"?topicsFlat().find(x=>x.id===id):null}
   function title(id){const x=row(id),m=window.ATOMIC_META?.[id]||{};return m.code?`${m.code} · ${m.title}`:(m.title||x?.g?.nome||id)}
   function fmtDate(v){try{return new Date(v).toLocaleString("pt-BR",{day:"2-digit",month:"2-digit",year:"2-digit",hour:"2-digit",minute:"2-digit"})}catch(e){return ""}}
@@ -29,7 +29,7 @@
       const c=canonical(id);
       return `<div class="question-round-history-empty">${c.q?"Este tópico possui apenas a base histórica anterior ao registro por rodadas. A próxima sessão passará a representar o desempenho atual.":"Nenhuma rodada registrada ainda."}</div>`;
     }
-    return `<div class="question-round-history" id="round-history-${safeId(id)}" ${visible?"":"hidden"}>
+    return `<div class="question-round-history" ${visible?"":"hidden"}>
       <div class="question-round-history-title">Últimos registros</div>
       ${list.map((r,i)=>{
         const qe=n(r.questoes),aa=n(r.acertos),ee=n(r.erros),bb=n(r.brancos);
@@ -46,13 +46,12 @@
   }
 
   function formHtml(id,{visible=false}={}){
-    const sid=safeId(id);
-    return `<div class="question-round-form" id="round-form-${sid}" ${visible?"":"hidden"}>
-      <div><label>Total da rodada</label><input id="round-q-${sid}" type="number" min="1" value="" placeholder="Ex.: 15"></div>
-      <div><label>Acertos</label><input id="round-a-${sid}" type="number" min="0" value="" placeholder="Ex.: 12"></div>
-      <div><label>Em branco</label><input id="round-b-${sid}" type="number" min="0" value="" placeholder="Ex.: 1"></div>
-      <div class="question-round-auto"><label>Erros</label><strong id="round-e-${sid}">—</strong><small>automático</small></div>
-      <button type="button" class="question-round-save" onclick="CGU_saveQuestionRound('${id}')">Registrar rodada</button>
+    return `<div class="question-round-form" ${visible?"":"hidden"}>
+      <div><label>Total da rodada</label><input data-round-field="q" type="number" min="1" value="" placeholder="Ex.: 15"></div>
+      <div><label>Acertos</label><input data-round-field="a" type="number" min="0" value="" placeholder="Ex.: 12"></div>
+      <div><label>Em branco</label><input data-round-field="b" type="number" min="0" value="" placeholder="Ex.: 1"></div>
+      <div class="question-round-auto"><label>Erros</label><strong data-round-error>—</strong><small>automático</small></div>
+      <button type="button" class="question-round-save" onclick="CGU_saveQuestionRound('${id}',this)">Registrar rodada</button>
     </div>`;
   }
 
@@ -71,8 +70,8 @@
     return `<div class="question-rounds" data-rounds-for="${escapeHtml(id)}">
       ${historicalStrip(id)}
       <div class="question-rounds-head">
-        <button type="button" class="question-round-add" onclick="CGU_toggleQuestionRound('${id}')">＋ Adicionar nova rodada</button>
-        ${rs.length?`<button type="button" class="question-round-history-btn" onclick="CGU_toggleQuestionHistory('${id}')">${rs.length} rodada(s) registrada(s)</button>`:""}
+        <button type="button" class="question-round-add" onclick="CGU_toggleQuestionRound('${id}',this)">＋ Adicionar nova rodada</button>
+        ${rs.length?`<button type="button" class="question-round-history-btn" onclick="CGU_toggleQuestionHistory('${id}',this)">${rs.length} rodada(s) registrada(s)</button>`:""}
       </div>
       ${formHtml(id,{visible:false})}
       ${rs.length?historyHtml(id,{visible:false,limit:3}):""}
@@ -88,35 +87,56 @@
     return html.includes(marker)?html.replace(marker,roundHtml(x.id)+marker):html+roundHtml(x.id);
   };
 
-  function bindForm(id){
-    const sid=safeId(id),q=document.getElementById(`round-q-${sid}`),a=document.getElementById(`round-a-${sid}`),b=document.getElementById(`round-b-${sid}`),e=document.getElementById(`round-e-${sid}`);
+  function bindForm(form){
+    if(!form)return;
+    const q=form.querySelector('[data-round-field="q"]');
+    const a=form.querySelector('[data-round-field="a"]');
+    const b=form.querySelector('[data-round-field="b"]');
+    const e=form.querySelector('[data-round-error]');
     const refresh=()=>{
       if(!q||!e)return;
       if(String(q.value).trim()===""){e.textContent="—";return;}
       const Q=n(q.value),A=n(a?.value),B=n(b?.value);
       e.textContent=String(Math.max(Q-A-B,0));
     };
-    [q,a,b].filter(Boolean).forEach(el=>{if(el.dataset.roundBound)return;el.dataset.roundBound="1";el.addEventListener("input",refresh)});
+    [q,a,b].filter(Boolean).forEach(el=>{
+      if(el.dataset.roundBound)return;
+      el.dataset.roundBound="1";
+      el.addEventListener("input",refresh);
+    });
     refresh();
   }
   function bindVisibleForms(){
-    document.querySelectorAll('.question-round-form:not([hidden])').forEach(form=>{
-      const id=form.closest('.question-rounds')?.dataset.roundsFor;
-      if(id)bindForm(id);
-    });
+    document.querySelectorAll('.question-round-form:not([hidden])').forEach(bindForm);
   }
 
-  window.CGU_toggleQuestionRound=function(id){
-    const el=document.getElementById(`round-form-${safeId(id)}`);if(!el)return;
-    el.hidden=!el.hidden;
-    if(!el.hidden){bindForm(id);document.getElementById(`round-q-${safeId(id)}`)?.focus();}
+  window.CGU_toggleQuestionRound=function(id,button){
+    const wrapper=button?.closest?.('.question-rounds');
+    const form=wrapper?.querySelector('.question-round-form');
+    if(!form)return;
+    form.hidden=!form.hidden;
+    if(!form.hidden){
+      bindForm(form);
+      form.querySelector('[data-round-field="q"]')?.focus();
+    }
   };
-  window.CGU_toggleQuestionHistory=function(id){const el=document.getElementById(`round-history-${safeId(id)}`);if(el)el.hidden=!el.hidden;};
+  window.CGU_toggleQuestionHistory=function(id,button){
+    const wrapper=button?.closest?.('.question-rounds');
+    const history=wrapper?.querySelector('.question-round-history');
+    if(history)history.hidden=!history.hidden;
+  };
 
-  window.CGU_saveQuestionRound=function(id){
-    const sid=safeId(id),qEl=document.getElementById(`round-q-${sid}`),aEl=document.getElementById(`round-a-${sid}`),bEl=document.getElementById(`round-b-${sid}`);
+  window.CGU_saveQuestionRound=function(id,button){
+    const form=button?.closest?.('.question-round-form');
+    if(!form){
+      alert("Não foi possível localizar o formulário desta rodada. Atualize a página e tente novamente.");
+      return;
+    }
+    const qEl=form.querySelector('[data-round-field="q"]');
+    const aEl=form.querySelector('[data-round-field="a"]');
+    const bEl=form.querySelector('[data-round-field="b"]');
     const q=n(qEl?.value),a=n(aEl?.value),b=n(bEl?.value);
-    if(q<=0){alert("Informe o total de questões desta rodada.");return;}
+    if(q<=0){alert("Informe o total de questões desta rodada.");qEl?.focus();return;}
     if(a+b>q){alert("Acertos + em branco não podem ultrapassar o total da rodada.");return;}
     const e=q-a-b,before=canonical(id),after={q:before.q+q,a:before.a+a,b:before.b+b,e:before.e+e};
     const roundLiquid=q?100*(a-e)/q:null;
