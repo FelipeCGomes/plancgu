@@ -27,6 +27,11 @@
 .question-round-history-row:last-child{border-bottom:0}.question-round-history-row b{font-size:9px;color:var(--navy,#17365D)}
 .question-round-more{padding:7px 9px;font-size:8px;color:#64748b;background:#f8fafc}
 .question-round-history-empty{margin-top:6px;padding:9px 10px;border:1px dashed var(--border,#dbe4f0);border-radius:9px;background:#f8fafc;font-size:8px;color:#64748b;line-height:1.4}
+.question-rounds:not(.review-mode) .question-round-history.latest-always-visible:not(.show-all-rounds) .question-round-history-row:not(.latest){display:none}
+.question-rounds:not(.review-mode) .question-round-history.latest-always-visible:not(.show-all-rounds) .question-round-more{display:none}
+.latest-round-inline{display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin:7px 0;padding:7px 9px;border:1px solid #bfdbfe;border-radius:8px;background:#eff6ff;font-size:8px;color:#475569}
+.latest-round-inline b{color:#17365D}.latest-round-inline strong{color:#0f2748}.latest-round-inline span{white-space:nowrap}
+.planner-qbox .latest-round-inline,.int-q .latest-round-inline{margin:8px 0}
 @media(max-width:1050px){.review-accumulated{grid-template-columns:repeat(3,minmax(0,1fr))!important}.review-accumulated .field label{white-space:normal}.question-round-history-row{grid-template-columns:1fr 1fr}}
-@media(max-width:760px){.review-accumulated{grid-template-columns:repeat(2,minmax(0,1fr))!important}.question-round-form{grid-template-columns:1fr 1fr}.question-round-save{grid-column:1/-1}.question-round-history-row{grid-template-columns:1fr 1fr}.question-history-strip{gap:6px}}
-@media(max-width:480px){.review-accumulated{grid-template-columns:1fr!important}.question-round-form{grid-template-columns:1fr}.question-round-save{grid-column:auto}.question-round-history-row{grid-template-columns:1fr}.question-history-strip{display:grid;grid-template-columns:1fr 1fr}}
+@media(max-width:760px){.review-accumulated{grid-template-columns:repeat(2,minmax(0,1fr))!important}.question-round-form{grid-template-columns:1fr 1fr}.question-round-save{grid-column:1/-1}.question-round-history-row{grid-template-columns:1fr 1fr}.question-history-strip{gap:6px}.latest-round-inline{gap:6px}}
+@media(max-width:480px){.review-accumulated{grid-template-columns:1fr!important}.question-round-form{grid-template-columns:1fr}.question-round-save{grid-column:auto}.question-round-history-row{grid-template-columns:1fr}.question-history-strip{display:grid;grid-template-columns:1fr 1fr}.latest-round-inline{display:grid;grid-template-columns:1fr 1fr}}
