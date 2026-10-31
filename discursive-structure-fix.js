@@ -11,22 +11,38 @@
     }
   }
 
-  const baseRender=window.CGU_renderDiscursiveTracker;
-  if(typeof baseRender==='function'){
-    window.CGU_renderDiscursiveTracker=function(){
-      const r=baseRender.apply(this,arguments);
+  function wrap(name){
+    const base=window[name];
+    if(typeof base!=='function'||base.__p4StructureWrapped)return;
+    const wrapped=function(){
+      const r=base.apply(this,arguments);
       fixSummaryClass();
       return r;
     };
+    wrapped.__p4StructureWrapped=true;
+    window[name]=wrapped;
   }
 
+  wrap('CGU_renderDiscursiveTracker');
+  wrap('CGU_p4Save');
+  wrap('CGU_p4Delete');
+  wrap('CGU_p4CancelEdit');
+
   const baseSwitch=window.switchPage;
-  if(typeof baseSwitch==='function'){
-    window.switchPage=function(name,btn){
+  if(typeof baseSwitch==='function'&&!baseSwitch.__p4StructureWrapped){
+    const wrappedSwitch=function(name,btn){
       const r=baseSwitch.apply(this,arguments);
       if(name==='discursiva')fixSummaryClass();
       return r;
     };
+    wrappedSwitch.__p4StructureWrapped=true;
+    window.switchPage=wrappedSwitch;
+  }
+
+  const summary=document.getElementById('p4Summary');
+  if(summary){
+    const observer=new MutationObserver(fixSummaryClass);
+    observer.observe(summary,{childList:true});
   }
 
   fixSummaryClass();
