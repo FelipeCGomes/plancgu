@@ -48,10 +48,12 @@ const EDITAL=[...EDITAL_P1,...EDITAL_P2,...EDITAL_P3];
       await loadScript("edital-timeline.js?v=20261024-1","editalTimeline");
       await loadScript("dashboard-overview.js?v=20261028-1","dashboardOverview");
       await loadScript("objective-goal-ui.js?v=20261030-1","objectiveGoalUi");
+      await loadScript("discursive-tracker.js?v=20261030-1","discursiveTracker");
       if(typeof renderAll==="function")renderAll();
       if(typeof window.CGU_renderEditalTimeline==="function")window.CGU_renderEditalTimeline();
       if(typeof window.CGU_optimizeDashboard==="function")window.CGU_optimizeDashboard();
       if(typeof window.CGU_renderObjectiveGoal==="function")window.CGU_renderObjectiveGoal();
+      if(typeof window.CGU_renderDiscursiveTracker==="function")window.CGU_renderDiscursiveTracker();
     }catch(e){
       console.error("Falha ao carregar módulos do painel:",e);
     }
