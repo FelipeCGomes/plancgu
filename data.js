@@ -31,6 +31,7 @@ const EDITAL=[...EDITAL_P1,...EDITAL_P2,...EDITAL_P3];
     try{
       // A meta objetiva precisa ser aplicada antes dos motores de desempenho e planejamento.
       await loadScript("objective-goal.js?v=20261031-2","objectiveGoal");
+      await loadScript("canonical-metrics.js?v=20261031-1","canonicalMetrics");
       await loadScript("performance.js?v=20261020-1","performance");
       await loadScript("menu.js?v=20261020-1","menu");
       await loadScript("consistency.js?v=20261020-1","consistency");
