@@ -2,7 +2,13 @@
    Piso competitivo: 210/260 = 80,8%.
    Alvo central: 220/260 = 84,6%.
    Meta superior: 230/260 = 88,5%.
-   Metas operacionais por bloco: P1 75%, P2 80%, P3 88% ≈ 220,4/260.
+
+   IMPORTANTE:
+   A meta global da prova NÃO deve ser usada como corte rígido em cada tópico.
+   Em amostras pequenas do Cebraspe, 1 erro derruba muito o percentual líquido.
+   Por isso, as metas abaixo são gatilhos operacionais de domínio/revisão por tópico:
+   P1 70%, P2 75%, P3 80% líquidos.
+   A projeção 210–230 continua sendo calculada separadamente pelo desempenho agregado ponderado.
 */
 (() => {
   const GOAL={
@@ -13,7 +19,7 @@
     floorPct:100*210/260,
     targetPct:100*220/260,
     stretchPct:100*230/260,
-    blockMeta:{P1:75,P2:80,P3:88},
+    blockMeta:{P1:70,P2:75,P3:80},
     p4Target:85
   };
   window.CGU_OBJECTIVE_GOAL=GOAL;
@@ -21,7 +27,7 @@
   function apply(){
     if(typeof settings!=="object")return;
     settings={...settings,...GOAL.blockMeta};
-    try{save();}catch(e){console.warn("Não foi possível salvar a nova meta objetiva",e)}
+    try{save();}catch(e){console.warn("Não foi possível salvar as metas operacionais",e)}
   }
 
   apply();
