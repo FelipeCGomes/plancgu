@@ -25,7 +25,7 @@ const EDITAL=[...EDITAL_P1,...EDITAL_P2,...EDITAL_P3];
 
   addCss("adaptive.css?v=20261020-2","adaptiveCss");
   addCss("menu.css?v=20261020-1","menuCss");
-  addCss("question-rounds.css?v=20261031-2","questionRoundsCss");
+  addCss("question-rounds.css?v=20261031-3","questionRoundsCss");
 
   window.addEventListener("load",async()=>{
     try{
