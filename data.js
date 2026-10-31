@@ -29,7 +29,7 @@ const EDITAL=[...EDITAL_P1,...EDITAL_P2,...EDITAL_P3];
   window.addEventListener("load",async()=>{
     try{
       // A meta objetiva precisa ser aplicada antes dos motores de desempenho e planejamento.
-      await loadScript("objective-goal.js?v=20261030-1","objectiveGoal");
+      await loadScript("objective-goal.js?v=20261031-2","objectiveGoal");
       await loadScript("performance.js?v=20261020-1","performance");
       await loadScript("menu.js?v=20261020-1","menu");
       await loadScript("consistency.js?v=20261020-1","consistency");
@@ -47,7 +47,7 @@ const EDITAL=[...EDITAL_P1,...EDITAL_P2,...EDITAL_P3];
       await loadScript("planner-intensive.js?v=20261024-2","plannerIntensive");
       await loadScript("edital-timeline.js?v=20261024-1","editalTimeline");
       await loadScript("dashboard-overview.js?v=20261028-1","dashboardOverview");
-      await loadScript("objective-goal-ui.js?v=20261030-1","objectiveGoalUi");
+      await loadScript("objective-goal-ui.js?v=20261031-2","objectiveGoalUi");
       await loadScript("discursive-persistence.js?v=20261031-1","discursivePersistence");
       await loadScript("discursive-tracker.js?v=20261030-1","discursiveTracker");
       await loadScript("discursive-type-fix.js?v=20261031-2","discursiveTypeFix");
