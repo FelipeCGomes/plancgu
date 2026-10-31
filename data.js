@@ -25,6 +25,7 @@ const EDITAL=[...EDITAL_P1,...EDITAL_P2,...EDITAL_P3];
 
   addCss("adaptive.css?v=20261020-2","adaptiveCss");
   addCss("menu.css?v=20261020-1","menuCss");
+  addCss("question-rounds.css?v=20261031-1","questionRoundsCss");
 
   window.addEventListener("load",async()=>{
     try{
@@ -42,6 +43,7 @@ const EDITAL=[...EDITAL_P1,...EDITAL_P2,...EDITAL_P3];
       await loadScript("backup-v2.js?v=20261020-1","backupV2");
       await loadScript("stable-edit.js?v=20261020-1","stableEdit");
       await loadScript("data-integrity.js?v=20261023-2","dataIntegrity");
+      await loadScript("question-rounds.js?v=20261031-1","questionRounds");
       await loadScript("planner-completion-policy.js?v=20261023-1","plannerCompletionPolicy");
       await loadScript("planner-weekend.js?v=20261023-1","plannerWeekend");
       await loadScript("planner-intensive.js?v=20261024-2","plannerIntensive");
