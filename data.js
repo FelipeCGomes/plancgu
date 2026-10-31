@@ -49,6 +49,7 @@ const EDITAL=[...EDITAL_P1,...EDITAL_P2,...EDITAL_P3];
       await loadScript("latest-round-ui-fix.js?v=20261031-1","latestRoundUiFix");
       await loadScript("planner-completion-policy.js?v=20261023-1","plannerCompletionPolicy");
       await loadScript("planner-weekend.js?v=20261023-1","plannerWeekend");
+      await loadScript("weekend-auto-review.js?v=20261031-1","weekendAutoReview");
       await loadScript("planner-intensive.js?v=20261024-2","plannerIntensive");
       await loadScript("edital-timeline.js?v=20261024-1","editalTimeline");
       await loadScript("dashboard-overview.js?v=20261031-2","dashboardOverview");
