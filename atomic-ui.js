@@ -21,6 +21,7 @@
   style.id="atomicUiStyle";
   style.textContent=`
     .atomic-parent{font-size:9px;color:#64748b;margin:2px 0 5px}.atomic-reason{margin:7px 0;padding:7px 9px;border:1px solid #e2e8f0;background:#f8fafc;border-radius:8px;font-size:9px;color:#475569;line-height:1.4}.atomic-reason b{color:#17365D}.atomic-code{font-weight:900;color:#17365D}.atomic-topic-title{font-weight:900;color:#0f2748;line-height:1.25}.legacy-note{margin-top:7px;padding:6px 8px;background:#fff7ed;border:1px solid #fed7aa;border-radius:8px;color:#9a3412;font-size:9px}
+    .atomic-accumulated-label{font-size:8px;font-weight:900;text-transform:uppercase;color:#64748b;letter-spacing:.2px;margin:8px 0 5px}.topic-grid.consistent .metric.readonly-accumulated{background:#f8fafc;border-color:#e2e8f0}
   `;
   document.head.appendChild(style);
 
@@ -36,14 +37,15 @@
       <div class="atomic-parent">${escapeHtml(parentLine(x))}</div>
       <div class="topic-text">${escapeHtml(x.t)}</div>
       <div class="atomic-reason"><b>Prioridade Cebraspe/CGU:</b> ${escapeHtml(am.reason||"")}</div>
+      <div class="atomic-accumulated-label">Acumulado até agora · somente leitura</div>
       <div class="topic-grid consistent">
         <div class="field"><label>Prioridade</label><select onchange="setPriority('${x.id}',this.value)">${["Crítica","Alta","Média","Baixa"].map(v=>`<option ${v===p?"selected":""}>${v}</option>`).join("")}</select></div>
-        <div class="field"><label>Total questões</label><input type="number" min="0" value="${m.q||""}" placeholder="0" onchange="setQuestion('${x.id}','questoes',this.value)"></div>
-        <div class="field"><label>Acertos</label><input type="number" min="0" value="${m.a||""}" placeholder="0" onchange="setQuestion('${x.id}','acertos',this.value)"></div>
-        <div class="field"><label>Em branco</label><input type="number" min="0" value="${Number(s.brancos)||0}" onchange="setQuestion('${x.id}','brancos',this.value)"></div>
-        <div class="field"><label>Erros</label><div class="metric">${m.e}</div></div>
-        <div class="field"><label>% bruto</label><div class="metric">${fmtPct(m.bruto)}</div></div>
-        <div class="field"><label>% líquido</label><div class="metric">${fmtPct(m.liquido)}</div></div>
+        <div class="field"><label>Total questões</label><div class="metric readonly-accumulated">${m.q}</div></div>
+        <div class="field"><label>Acertos</label><div class="metric readonly-accumulated">${m.a}</div></div>
+        <div class="field"><label>Em branco</label><div class="metric readonly-accumulated">${Number(s.brancos)||0}</div></div>
+        <div class="field"><label>Erros</label><div class="metric readonly-accumulated">${m.e}</div></div>
+        <div class="field"><label>% bruto</label><div class="metric readonly-accumulated">${fmtPct(m.bruto)}</div></div>
+        <div class="field"><label>% líquido</label><div class="metric readonly-accumulated">${fmtPct(m.liquido)}</div></div>
         <div class="field"><label>Meta / status</label><div class="metric ${statusClass(m.status)}">${m.meta}% · ${m.status}</div></div>
       </div>
       ${last?`<div class="topic-last">Última atualização: ${last}</div>`:""}
