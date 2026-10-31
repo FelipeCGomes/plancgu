@@ -1,13 +1,13 @@
-/* Plano adaptativo balanceado v3.
-   Objetivo: evitar que um único assunto (ex.: Redes) monopolize o calendário.
-   Mantém adaptação por desempenho, mas distribui o estudo entre P1, P2 e P3 e entre matérias.
+/* Plano adaptativo balanceado v4.
+   Objetivo: evitar que um único assunto monopolize o calendário e alinhar o ciclo à meta de 210–230/260 líquidos.
+   Distribui o estudo entre P1, P2 e P3, com reforço de P3 por concentrar a maior parte dos pontos.
 */
 (() => {
   const PLAN_KEY = KEY + "-daily-plans-v1";
-  const VERSION = 3;
+  const VERSION = 4;
   const START = "2026-10-19";
-  // Distribuição semanal aproximada: P3 4/7, P2 2/7, P1 1/7.
-  const EXAM_ROTATION = ["P3","P2","P3","P1","P3","P2","P3"];
+  // Distribuição semanal-base: P3 5/7, P2 1/7, P1 1/7. Fins de semana podem ser sobrescritos pelo plano intensivo.
+  const EXAM_ROTATION = ["P3","P2","P3","P1","P3","P3","P3"];
   const GROUP_LESSONS = {
     "Ordem Constitucional e Direitos":["pf1","pf2","df1","df2","df21","df25","df26","df27","adm1","adm2"],
     "Governança e Responsabilidades":["gov8","gov9","gov10","gov11","gov12"],
@@ -37,14 +37,14 @@
   function sameYmd(value,ymd){if(!value)return false;const d=new Date(value);if(isNaN(d))return false;return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`===ymd;}
 
   function needScore(x){
-    let s=({"Crítica":130,"Alta":95,"Média":55,"Baixa":25}[x.priority]||25)+({P3:80,P2:38,P1:15}[x.exam]||0);
+    let s=({"Crítica":130,"Alta":95,"Média":55,"Baixa":25}[x.priority]||25)+({P3:100,P2:34,P1:12}[x.exam]||0);
     const m=x.m;
     if(!m.q)s+=42;
     else if(m.status==="Revisar"){
-      const gap=Math.max(0,m.meta-m.liquido);s+=95+Math.min(85,gap*2.2);
+      const gap=Math.max(0,m.meta-m.liquido);s+=95+Math.min(90,gap*2.4);
     }else{
       if(m.q<15)s+=18;
-      if(m.liquido>=m.meta+15)s-=55;
+      if(m.liquido>=m.meta+10)s-=55;
     }
     if(m.s.done&&m.status==="Atendeu")s-=240;
     if(m.s.done&&m.status==="Revisar")s+=15;
@@ -98,7 +98,6 @@
     let lane=laneForDate(ymd);
     let subjects=subjectRows(lane,exclude);
     if(!subjects.length){
-      // Fallback apenas se o bloco do dia estiver totalmente satisfeito.
       const all=eligible(null,exclude).map(x=>({...x,_need:needScore(x)})).sort((a,b)=>b._need-a._need);
       return all[0]||null;
     }
@@ -118,7 +117,6 @@
     if(!p)return true;
     if(Number(p.plannerVersion)!==VERSION)return true;
     if(!topicsFlat().some(x=>x.id===p.activeTopicId))return true;
-    // Datas futuras ainda não iniciadas são sempre recalculadas com o estado atual.
     if(ymd>ymdToday() && !(p.completed||[]).length && !p.questionRegistered && !p.userTouched)return true;
     return false;
   }
@@ -132,7 +130,6 @@
     }
     let x=topicsFlat().find(r=>r.id===p.activeTopicId)||null;
     if(x){
-      // Alterações feitas no Edital também alimentam o plano.
       if(x.m.s.done)p.studied=true;
       if(sameYmd(x.m.s.lastQuestionDate,ymd))p.questionRegistered=true;
       if(p.studied&&p.questionRegistered){
@@ -190,7 +187,7 @@
   window.CGU_markPlanStudied=function(topicId,ymd,v){
     const {plans,p,x}=ensurePlan(ymd);if(!x||x.id!==topicId)return;
     p.studied=!!v;p.userTouched=true;
-    setTS(topicId,{done:!!v,completedAtMs:v?Date.now():null,completionSource:"planner-balance-v3",updatedAtMs:Date.now()});
+    setTS(topicId,{done:!!v,completedAtMs:v?Date.now():null,completionSource:"planner-balance-v4",updatedAtMs:Date.now()});
     savePlan(ymd,p,plans);
     if(v&&p.questionRegistered)advance(ymd,plans,p,x);
     renderAll();toast(v?"Tema marcado como estudado.":"Tema reaberto.");
@@ -223,18 +220,17 @@
   renderToday=function(){
     const host=document.getElementById("todayLessons");if(!host)return;
     const ymd=selectedDate(),d=dateObj(ymd),{p,x}=ensurePlan(ymd);
-    document.getElementById("todayTitle").textContent=`Plano adaptativo balanceado · ${d.toLocaleDateString("pt-BR",{weekday:"long",day:"2-digit",month:"2-digit"})}`;
+    document.getElementById("todayTitle").textContent=`Plano adaptativo · meta 210–230 pts · ${d.toLocaleDateString("pt-BR",{weekday:"long",day:"2-digit",month:"2-digit"})}`;
     if(!x){host.innerHTML='<div class="empty">Todos os temas elegíveis foram concluídos.</div>';return;}
     const a=allocation(x),am=atomic(x),studied=!!p.studied,qok=!!p.questionRegistered;
     const budget=document.querySelectorAll(".study-budget .budget-item b");if(budget.length>=3){budget[0].textContent=`${a.video} min`;budget[1].textContent=`${a.questions} min`;budget[2].textContent=`${a.review} min`;}
-    host.innerHTML=`<div class="planner-focus"><div class="small">Faixa do dia: <b>${laneForDate(ymd)}</b> · ${escapeHtml(x.d.nome)} → ${escapeHtml(x.g.nome)}</div><h3>🎯 ${escapeHtml(topicTitle(x))}</h3><div class="planner-badges"><span class="badge ${priClass(x.priority)}">${x.priority}</span><span class="badge ${examClass(x.exam)}">${x.exam}</span><span class="badge">Cebraspe/CGU</span></div></div><div class="lesson-card planner-theme"><div class="topic-text">${escapeHtml(x.t)}</div><div class="atomic-reason"><b>Por que entrou hoje:</b> ${escapeHtml(am.reason||"")} ${escapeHtml(situation(x))}</div>${materialHtml(x,a)}<div class="custom-study-actions"><button class="primary" onclick="CGU_markPlanStudied('${x.id}','${ymd}',${!studied})">${studied?"✓ Tema estudado — reabrir":"✓ Marcar tema estudado"}</button></div>${questionBox(x,ymd)}</div><div class="focus-lock ${studied&&qok?"ok":""}"><b>Regra de avanço:</b> ${studied?"✓ estudo":"○ estudar"} + ${qok?"✓ questões":"○ registrar questões"}. Depois o sistema escolhe outro tema, preferindo outra matéria dentro da faixa do dia.</div>`;
+    host.innerHTML=`<div class="planner-focus"><div class="small">Faixa do dia: <b>${laneForDate(ymd)}</b> · ${escapeHtml(x.d.nome)} → ${escapeHtml(x.g.nome)}</div><h3>🎯 ${escapeHtml(topicTitle(x))}</h3><div class="planner-badges"><span class="badge ${priClass(x.priority)}">${x.priority}</span><span class="badge ${examClass(x.exam)}">${x.exam}</span><span class="badge">Meta 210–230</span></div></div><div class="lesson-card planner-theme"><div class="topic-text">${escapeHtml(x.t)}</div><div class="atomic-reason"><b>Por que entrou hoje:</b> ${escapeHtml(am.reason||"")} ${escapeHtml(situation(x))}</div>${materialHtml(x,a)}<div class="custom-study-actions"><button class="primary" onclick="CGU_markPlanStudied('${x.id}','${ymd}',${!studied})">${studied?"✓ Tema estudado — reabrir":"✓ Marcar tema estudado"}</button></div>${questionBox(x,ymd)}</div><div class="focus-lock ${studied&&qok?"ok":""}"><b>Regra de avanço:</b> ${studied?"✓ estudo":"○ estudar"} + ${qok?"✓ questões":"○ registrar questões"}. Depois o sistema escolhe outro tema, preferindo outra matéria dentro da faixa do dia.</div>`;
     document.getElementById("todayRoutine").innerHTML=`<div class="plan-line"><div class="plan-time">0–${a.video}m</div><div><b>Teoria direcionada</b><div class="plan-kind">${escapeHtml(topicTitle(x))}</div></div><b>${a.video} min</b></div><div class="plan-line"><div class="plan-time">${a.video}–${a.video+a.questions}m</div><div><b>Questões Cebraspe</b><div class="plan-kind">mesmo subitem do edital</div></div><b>${a.questions} min</b></div><div class="plan-line"><div class="plan-time">${a.video+a.questions}–180m</div><div><b>Revisão ativa</b><div class="plan-kind">erros, resumo e pontos-chave</div></div><b>${a.review} min</b></div>`;
-    document.getElementById("todayRelease").innerHTML=`<div class="small"><b>Lógica:</b> a data define uma faixa P1/P2/P3; dentro dela, o sistema combina prioridade, lacuna de desempenho e cobertura, mas evita repetir a mesma matéria quando há alternativas.</div>${weeklyPreview(ymd)}`;
+    document.getElementById("todayRelease").innerHTML=`<div class="small"><b>Lógica:</b> meta central 220/260. A data define uma faixa P1/P2/P3; dentro dela, o sistema combina prioridade, lacuna de desempenho e cobertura, com maior presença de P3 no ciclo semanal.</div>${weeklyPreview(ymd)}`;
   };
 
   const style=document.createElement("style");style.id="plannerBalanceStyle";style.textContent=`.planner-week{margin-top:12px;border-top:1px solid #e2e8f0;padding-top:10px}.planner-preview-row{display:grid;grid-template-columns:105px 35px 1fr;gap:8px;padding:5px 0;border-bottom:1px solid #f1f5f9;font-size:9px}.planner-preview-row b{color:#17365D}.planner-preview-row span:last-child{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}`;document.head.appendChild(style);
 
-  // Planos futuros antigos sem interação não devem permanecer presos ao algoritmo anterior.
   const plans=readPlans(),today=ymdToday();let changed=false;
   Object.keys(plans).forEach(d=>{const p=plans[d];if(d>today&&Number(p?.plannerVersion)!==VERSION&&!(p?.completed||[]).length&&!p?.questionRegistered){delete plans[d];changed=true;}});
   if(changed)writePlans(plans);
