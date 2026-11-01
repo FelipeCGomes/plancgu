@@ -25,7 +25,7 @@ const EDITAL=[...EDITAL_P1,...EDITAL_P2,...EDITAL_P3];
 
   addCss("adaptive.css?v=20261020-2","adaptiveCss");
   addCss("menu.css?v=20261020-1","menuCss");
-  addCss("question-rounds.css?v=20261031-5","questionRoundsCss");
+  addCss("question-rounds.css?v=20261101-1","questionRoundsCss");
 
   window.addEventListener("load",async()=>{
     try{
@@ -52,6 +52,7 @@ const EDITAL=[...EDITAL_P1,...EDITAL_P2,...EDITAL_P3];
       await loadScript("weekend-auto-review.js?v=20261031-1","weekendAutoReview");
       await loadScript("planner-intensive.js?v=20261024-2","plannerIntensive");
       await loadScript("latest-round-everywhere.js?v=20261031-1","latestRoundEverywhere");
+      await loadScript("question-round-minimum.js?v=20261101-1","questionRoundMinimum");
       await loadScript("edital-timeline.js?v=20261024-1","editalTimeline");
       await loadScript("dashboard-overview.js?v=20261031-2","dashboardOverview");
       await loadScript("objective-goal-ui.js?v=20261031-3","objectiveGoalUi");
@@ -68,6 +69,7 @@ const EDITAL=[...EDITAL_P1,...EDITAL_P2,...EDITAL_P3];
       if(typeof window.CGU_renderObjectiveGoal==="function")window.CGU_renderObjectiveGoal();
       if(typeof window.CGU_patchLatestRoundDashboard==="function")window.CGU_patchLatestRoundDashboard();
       if(typeof window.CGU_showLatestRoundEverywhere==="function")window.CGU_showLatestRoundEverywhere();
+      if(typeof window.CGU_refreshQuestionRoundMinimum==="function")window.CGU_refreshQuestionRoundMinimum();
       if(typeof window.CGU_renderDiscursiveTracker==="function")window.CGU_renderDiscursiveTracker();
       if(typeof window.CGU_cleanupDiscursiveStyles==="function")window.CGU_cleanupDiscursiveStyles();
       if(typeof window.CGU_fixDiscursiveStructure==="function")window.CGU_fixDiscursiveStructure();
