@@ -42,6 +42,17 @@ html,body{font-size:12px}
 .auth-input,
 textarea{font-size:12px!important}
 
+/* Botões do app: 3px menores que o padrão compacto anterior. */
+.app button:not(.auth-show){font-size:9px!important;line-height:1.15}
+.lesson-actions button,
+.custom-study-actions button,
+.int-actions button,
+.question-rounds-head button{padding:4px 7px!important;min-height:27px!important}
+.int-q-grid button,
+.lesson-question-grid button,
+.question-round-save{padding:6px 8px!important;min-height:30px!important}
+.backup button{padding:5px!important}
+
 /* Autenticação */
 .auth-logo{font-size:8px!important}
 .auth-card h2{font-size:19px!important}
