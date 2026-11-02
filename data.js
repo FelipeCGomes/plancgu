@@ -26,6 +26,7 @@ const EDITAL=[...EDITAL_P1,...EDITAL_P2,...EDITAL_P3];
   addCss("adaptive.css?v=20261020-2","adaptiveCss");
   addCss("menu.css?v=20261020-1","menuCss");
   addCss("question-rounds.css?v=20261101-2","questionRoundsCss");
+  addCss("edital-filters.css?v=20261102-1","editalFiltersCss");
 
   window.addEventListener("load",async()=>{
     try{
@@ -54,6 +55,7 @@ const EDITAL=[...EDITAL_P1,...EDITAL_P2,...EDITAL_P3];
       await loadScript("latest-round-everywhere.js?v=20261031-1","latestRoundEverywhere");
       await loadScript("question-round-minimum.js?v=20261101-1","questionRoundMinimum");
       await loadScript("round-live-save.js?v=20261101-1","roundLiveSave");
+      await loadScript("edital-filters.js?v=20261102-1","editalFilters");
       await loadScript("edital-timeline.js?v=20261024-1","editalTimeline");
       await loadScript("dashboard-overview.js?v=20261031-2","dashboardOverview");
       await loadScript("objective-goal-ui.js?v=20261031-3","objectiveGoalUi");
