@@ -1,0 +1,5 @@
+.filters.edital-filters{grid-template-columns:minmax(260px,1.45fr) repeat(5,minmax(130px,.55fr));align-items:center}
+.filters.edital-filters select{min-width:0}
+@media(max-width:1250px){.filters.edital-filters{grid-template-columns:repeat(3,minmax(0,1fr))}.filters.edital-filters #search{grid-column:1/-1}}
+@media(max-width:700px){.filters.edital-filters{grid-template-columns:1fr 1fr}.filters.edital-filters #search{grid-column:1/-1}}
+@media(max-width:480px){.filters.edital-filters{grid-template-columns:1fr}}
