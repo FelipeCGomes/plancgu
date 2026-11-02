@@ -66,6 +66,8 @@ const EDITAL=[...EDITAL_P1,...EDITAL_P2,...EDITAL_P3];
       await loadScript("discursive-enhancements.js?v=20261031-1","discursiveEnhancements");
       await loadScript("discursive-style-cleanup.js?v=20261031-1","discursiveStyleCleanup");
       await loadScript("discursive-structure-fix.js?v=20261031-2","discursiveStructureFix");
+      // Última camada do Plano: evita rerender global e remove textos redundantes.
+      await loadScript("plan-focus-ui.js?v=20261102-1","planFocusUi");
       if(typeof renderAll==="function")renderAll();
       if(typeof window.CGU_renderEditalTimeline==="function")window.CGU_renderEditalTimeline();
       if(typeof window.CGU_optimizeDashboard==="function")window.CGU_optimizeDashboard();
@@ -76,6 +78,7 @@ const EDITAL=[...EDITAL_P1,...EDITAL_P2,...EDITAL_P3];
       if(typeof window.CGU_renderDiscursiveTracker==="function")window.CGU_renderDiscursiveTracker();
       if(typeof window.CGU_cleanupDiscursiveStyles==="function")window.CGU_cleanupDiscursiveStyles();
       if(typeof window.CGU_fixDiscursiveStructure==="function")window.CGU_fixDiscursiveStructure();
+      if(typeof window.CGU_cleanPlanUi==="function")window.CGU_cleanPlanUi();
     }catch(e){
       console.error("Falha ao carregar módulos do painel:",e);
     }
