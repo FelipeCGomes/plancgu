@@ -1,0 +1,67 @@
+/* Tipografia compacta global.
+   Reduz em ~4px os textos médios/grandes do app inteiro.
+   Microtextos já pequenos (8–11px) são preservados para não perder legibilidade. */
+
+html,body{font-size:12px}
+
+/* Estrutura geral */
+.brand{font-size:16px!important}
+.exam-box b{font-size:9px!important}
+.topbar h1{font-size:13px!important}
+.hero h2{font-size:20px!important}
+.hero p{font-size:9px!important}
+
+/* Dashboard */
+.kpi .v{font-size:20px!important}
+.card h3{font-size:10px!important}
+.block-row{font-size:8px!important}
+.queue-title{font-size:8px!important}
+
+/* Edital / Revisar */
+.subject-name{font-size:10px!important}
+.subject-stats b{font-size:10px!important}
+.topic-title{font-size:9px!important}
+.atomic-topic-title{font-size:12px!important}
+.metric{font-size:8px!important}
+.setting b{font-size:8px!important}
+
+/* Plano de estudos */
+.today-card h3{font-size:11px!important}
+.budget-item b{font-size:15px!important}
+.lesson-title{font-size:9px!important}
+.plan-time{font-size:8px!important}
+
+/* Elementos gerais que herdavam 16px do navegador */
+.nav button,
+.filters input,.filters select,
+.field input,.field select,
+.note-row input,
+.setting input,
+.daily-date input,
+.auth-button,
+.auth-input,
+textarea{font-size:12px!important}
+
+/* Autenticação */
+.auth-logo{font-size:8px!important}
+.auth-card h2{font-size:19px!important}
+.auth-card p{font-size:8px!important}
+.auth-input{font-size:12px!important}
+.auth-show{font-size:14px!important}
+
+/* Discursivas / P4 */
+#page-discursiva h2{font-size:20px!important}
+#page-discursiva h3{font-size:10px!important}
+#page-discursiva .p4-entry-score,
+#page-discursiva .p4-summary .value,
+#page-discursiva .p4-summary-value{font-size:12px!important}
+
+/* Mantém microtextos existentes legíveis. */
+.small,.badge,.field label,.topic-text,.lesson-meta,
+.question-round-help,.question-round-history-row,
+.question-round-minimum,.latest-round-inline{font-size:max(8px,1em)}
+
+@media(max-width:900px){
+  .brand{font-size:14px!important}
+  .hero h2{font-size:18px!important}
+}
