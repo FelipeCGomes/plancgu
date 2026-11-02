@@ -53,6 +53,16 @@ textarea{font-size:12px!important}
 .question-round-save{padding:6px 8px!important;min-height:30px!important}
 .backup button{padding:5px!important}
 
+/* Overlay curto: ações do Plano sem sair da tela. */
+.plan-action-overlay{position:fixed;inset:0;z-index:9998;display:flex;align-items:center;justify-content:center;background:rgba(15,23,42,.08);opacity:0;pointer-events:none;transition:opacity .12s ease}
+.plan-action-overlay.show{opacity:1;pointer-events:auto}
+.plan-action-box{min-width:170px;padding:13px 16px;border:1px solid #dbe4f0;border-radius:12px;background:#fff;box-shadow:0 15px 40px rgba(15,23,42,.16);display:grid;grid-template-columns:24px 1fr;column-gap:9px;align-items:center;color:#17365D}
+.plan-action-box b{font-size:10px}.plan-action-box small{grid-column:2;font-size:8px;color:#64748b;margin-top:2px}
+.plan-action-spinner{width:20px;height:20px;border:2px solid #dbeafe;border-top-color:#2563eb;border-radius:50%;animation:planSpin .55s linear infinite;grid-row:1/3}
+.plan-action-overlay.ok .plan-action-spinner{animation:none;border-color:#86efac;background:#dcfce7;position:relative}
+.plan-action-overlay.ok .plan-action-spinner:after{content:'✓';position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;color:#15803d}
+@keyframes planSpin{to{transform:rotate(360deg)}}
+
 /* Autenticação */
 .auth-logo{font-size:8px!important}
 .auth-card h2{font-size:19px!important}
