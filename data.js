@@ -81,6 +81,10 @@ const EDITAL=[...EDITAL_P1,...EDITAL_P2,...EDITAL_P3];
       if(typeof window.CGU_cleanPlanUi==="function")window.CGU_cleanPlanUi();
     }catch(e){
       console.error("Falha ao carregar módulos do painel:",e);
+    }finally{
+      // A splash só termina depois da montagem inicial das páginas.
+      window.CGUFeedback?.installNavigation?.();
+      window.dispatchEvent(new Event("cgu-app-ready"));
     }
   });
 })();
