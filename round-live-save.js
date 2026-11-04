@@ -20,8 +20,8 @@
     el.innerHTML='<div class="round-live-box"><span class="round-live-spinner"></span><b>Atualizando rodada...</b><small>Sem recarregar a página</small></div>';
     document.body.appendChild(el);return el;
   }
-  function showSaving(){const el=ensureOverlay();el.classList.remove('ok');el.classList.add('show');el.querySelector('b').textContent='Atualizando rodada...';el.querySelector('small').textContent='Sem recarregar a página';}
-  function showSaved(){const el=ensureOverlay();el.classList.add('ok');el.querySelector('b').textContent='Rodada registrada';el.querySelector('small').textContent='Estado atualizado';setTimeout(()=>el.classList.remove('show','ok'),550)}
+  function showSaving(){if(window.CGUFeedback){window.CGUFeedback.begin('Atualizando rodada...');return}const el=ensureOverlay();el.classList.remove('ok');el.classList.add('show');el.querySelector('b').textContent='Atualizando rodada...';el.querySelector('small').textContent='Sem recarregar a página';}
+  function showSaved(){if(window.CGUFeedback){window.CGUFeedback.complete();return}const el=ensureOverlay();el.classList.add('ok');el.querySelector('b').textContent='Rodada registrada';el.querySelector('small').textContent='Estado atualizado';setTimeout(()=>el.classList.remove('show','ok'),550)}
 
   function historyMarkup(id,review){
     const rs=rounds(id),list=rs.slice(-3).reverse();
