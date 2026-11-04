@@ -54,7 +54,7 @@ const EDITAL=[...EDITAL_P1,...EDITAL_P2,...EDITAL_P3];
       await loadScript("planner-intensive.js?v=20261024-2","plannerIntensive");
       await loadScript("latest-round-everywhere.js?v=20261031-1","latestRoundEverywhere");
       await loadScript("question-round-minimum.js?v=20261101-1","questionRoundMinimum");
-      await loadScript("round-live-save.js?v=20261101-1","roundLiveSave");
+      await loadScript("round-live-save.js?v=20261104-1","roundLiveSave");
       await loadScript("edital-filters.js?v=20261102-1","editalFilters");
       await loadScript("edital-timeline.js?v=20261024-1","editalTimeline");
       await loadScript("dashboard-overview.js?v=20261031-2","dashboardOverview");
@@ -67,7 +67,7 @@ const EDITAL=[...EDITAL_P1,...EDITAL_P2,...EDITAL_P3];
       await loadScript("discursive-style-cleanup.js?v=20261031-1","discursiveStyleCleanup");
       await loadScript("discursive-structure-fix.js?v=20261031-2","discursiveStructureFix");
       // Última camada do Plano: evita rerender global e remove textos redundantes.
-      await loadScript("plan-focus-ui.js?v=20261102-1","planFocusUi");
+      await loadScript("plan-focus-ui.js?v=20261104-1","planFocusUi");
       if(typeof renderAll==="function")renderAll();
       if(typeof window.CGU_renderEditalTimeline==="function")window.CGU_renderEditalTimeline();
       if(typeof window.CGU_optimizeDashboard==="function")window.CGU_optimizeDashboard();
