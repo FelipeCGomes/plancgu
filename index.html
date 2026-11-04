@@ -6,9 +6,25 @@
 <title>CGU Cargo 3 — Edital Verticalizado por Prioridade</title>
 <link rel="stylesheet" href="styles.css?v=20261031-1">
 <link rel="stylesheet" href="firebase.css?v=20261020-1">
-<link rel="stylesheet" href="compact-fonts.css?v=20261102-2">
+<link rel="stylesheet" href="compact-fonts.css?v=20261104-1">
 </head>
 <body class="auth-locked">
+
+<div id="cguSplash" role="status" aria-live="polite" aria-hidden="false">
+  <div class="cgu-splash-panel">
+    <div class="cgu-splash-symbol"><strong>CGU</strong></div>
+    <h2>CGU 2026</h2>
+    <p data-splash-message>Preparando seu plano de estudos...</p>
+    <div class="cgu-splash-track" aria-hidden="true"><span></span></div>
+  </div>
+</div>
+<div id="cguUpdateModal" class="is-hidden" role="status" aria-live="polite" aria-hidden="true">
+  <div class="cgu-update-box">
+    <span class="cgu-update-spinner" aria-hidden="true"></span>
+    <b data-update-message>Atualizando informações...</b>
+    <small data-update-hint>Sem sair desta tela</small>
+  </div>
+</div>
 
 <div id="authGate" role="dialog" aria-modal="true" aria-labelledby="authTitle">
   <div class="auth-card">
@@ -134,7 +150,8 @@
 <script src="data-p2.js?v=20261020-1" defer></script>
 <script src="data-p3.js?v=20261020-1" defer></script>
 <script src="atomic-model.js?v=20261020-1" defer></script>
-<script src="data.js?v=20261102-2" defer></script>
+<script src="ui-feedback.js?v=20261104-1" defer></script>
+<script src="data.js?v=20261104-1" defer></script>
 <script src="lessons.js?v=20261020-1" defer></script>
 <script src="app-core.js?v=20261020-1" defer></script>
 <script src="history.js?v=20261020-1" defer></script>
