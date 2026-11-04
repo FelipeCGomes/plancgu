@@ -19,9 +19,11 @@
     document.body.appendChild(el);return el;
   }
   function showLoading(text='Atualizando...'){
+    if(window.CGUFeedback){window.CGUFeedback.begin(text);return}
     const el=overlay();el.querySelector('b').textContent=text;el.querySelector('small').textContent='Sem sair da página';el.classList.add('show');
   }
   function hideLoading(ok='Atualizado'){
+    if(window.CGUFeedback){window.CGUFeedback.complete();return}
     const el=overlay();el.classList.add('ok');el.querySelector('b').textContent=ok;el.querySelector('small').textContent='Estado salvo';
     setTimeout(()=>el.classList.remove('show','ok'),420);
   }
