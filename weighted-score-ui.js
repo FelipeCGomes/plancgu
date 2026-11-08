@@ -47,9 +47,10 @@
     if(anchor&&host.contains(anchor))anchor.insertAdjacentHTML("afterend",html);
     else host.insertAdjacentHTML("afterbegin",html);
   }
-  function patchQuestionCards(root=document){
+  function patchQuestionCards(root=document,onlyId=null){
     root.querySelectorAll(".question-rounds[data-rounds-for]").forEach(w=>{
       const id=w.dataset.roundsFor;
+      if(onlyId&&id!==onlyId)return;
       replaceOrInsert(w,id,w.querySelector(".question-history-strip"));
       const x=current(id);
       const weight=WEIGHTS[x?.exam]||1;
@@ -66,10 +67,10 @@
       });
     });
   }
-  function patchPlan(root=document){
+  function patchPlan(root=document,onlyId=null){
     root.querySelectorAll(".planner-qbox").forEach(box=>{
       const id=box.querySelector(".planner-target select")?.value;
-      if(!id)return;
+      if(!id||(onlyId&&onlyId!==id))return;
       replaceOrInsert(box,id,box.querySelector(".latest-round-inline")||box.querySelector(".question-cumulative"));
       const select=box.querySelector(".planner-target select");
       if(select&&!select.dataset.weightedBound){select.dataset.weightedBound="1";select.addEventListener("change",()=>replaceOrInsert(box,select.value,box.querySelector(".latest-round-inline")||box.querySelector(".question-cumulative")));}
@@ -77,7 +78,7 @@
     root.querySelectorAll(".int-q").forEach(box=>{
       const raw=box.querySelector('button[onclick*="CGU_intensiveSaveQuestions"]')?.getAttribute("onclick")||"";
       const m=raw.match(/CGU_intensiveSaveQuestions\('([^']+)'/);
-      if(m)replaceOrInsert(box,m[1],box.querySelector(".latest-round-inline")||box.querySelector(".question-cumulative"));
+      if(m&&(!onlyId||m[1]===onlyId))replaceOrInsert(box,m[1],box.querySelector(".latest-round-inline")||box.querySelector(".question-cumulative"));
     });
   }
   function examProjection(){
@@ -177,7 +178,12 @@
     };
   }
   window.CGU_refreshWeightedScores=patchAll;
-  window.addEventListener("cgu-question-recorded",()=>requestAnimationFrame(patchAll));
+  window.addEventListener("cgu-question-recorded",ev=>requestAnimationFrame(()=>{
+    const id=ev.detail?.topicId||null;
+    patchQuestionCards(document,id);
+    patchPlan(document,id);
+    patchDashboard();
+  }));
   window.addEventListener("cgu-cloud-ready",()=>requestAnimationFrame(patchAll));
   try{patchAll()}catch(err){console.warn("Pontuação ponderada CGU:",err)}
 })();
