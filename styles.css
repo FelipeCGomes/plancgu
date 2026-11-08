@@ -208,3 +208,36 @@ body{overflow-wrap:anywhere}
 #page-discursiva .p4-entry-notes{font-size:9px;color:#475569;line-height:1.45;margin-top:8px;padding-top:7px;border-top:1px solid #eef2f7}
 @media(max-width:1100px){#page-discursiva .p4-layout{grid-template-columns:1fr}#page-discursiva .p4-summary-grid,#page-discursiva .p4-score-grid,#page-discursiva .p4-live,#page-discursiva .p4-rubric-grid,#page-discursiva .p4-eval-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:650px){#page-discursiva .p4-summary-grid,#page-discursiva .p4-form-grid,#page-discursiva .p4-score-grid,#page-discursiva .p4-live,#page-discursiva .p4-rubric-grid,#page-discursiva .p4-eval-grid{grid-template-columns:1fr}#page-discursiva .p4-form-grid .span2,#page-discursiva .p4-form-grid .span3,#page-discursiva .p4-extra-source,#page-discursiva .p4-training-toggle,#page-discursiva .p4-convergence,#page-discursiva .p4-live-note{grid-column:1/-1}#page-discursiva .p4-entry-top{display:block}#page-discursiva .p4-entry-score{text-align:left;margin-top:8px}}
+
+
+/* Pontuação Cebraspe por peso — mesma linguagem visual do app. */
+.cgu-weighted-grade{border:1px solid #dbe4f0;background:#f8fafc;border-radius:9px;padding:9px 11px;margin:7px 0 9px;color:#334155;line-height:1.4}
+.cgu-weighted-grade.is-met{border-color:#bbf7d0;background:#f0fdf4}
+.cgu-weighted-grade.is-gap{border-color:#bfdbfe;background:#eff6ff}
+.cgu-weighted-grade.is-pending{display:flex;gap:9px;flex-wrap:wrap;font-size:10px}
+.cgu-weighted-line{display:flex;align-items:center;gap:8px 14px;flex-wrap:wrap}
+.cgu-weighted-line>span:first-child{display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+.cgu-weighted-line b{color:#17365d}
+.cgu-weighted-line em{font-size:9px;color:#64748b;font-style:normal;font-weight:700}
+.cgu-weighted-line strong{color:#0f2748;font-size:14px;font-weight:900}
+.cgu-weighted-goal,.cgu-weighted-diff{font-size:10px}
+.cgu-weighted-diff{font-weight:800;color:#b45309}
+.cgu-weighted-grade.is-met .cgu-weighted-diff{color:#15803d}
+.cgu-weighted-formula{margin-top:4px;color:#64748b;font-size:9px;line-height:1.45}
+.cgu-weighted-formula b{color:#334155}
+.cgu-round-points{color:#17365d;font-weight:900!important;font-size:9px}
+.cgu-weighted-exam{margin:0 0 16px;padding:14px 16px}
+.cgu-weighted-exam-head{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:10px}
+.cgu-weighted-exam-head h3{margin:0;font-size:13px}
+.cgu-weighted-exam-head span{font-size:10px;color:#64748b}
+.cgu-weighted-exam-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.cgu-weighted-exam-cell{border:1px solid #e2e8f0;border-radius:10px;padding:10px 12px;background:#f8fafc;min-width:0;display:flex;flex-direction:column;gap:3px}
+.cgu-weighted-exam-cell>b{font-size:10px;color:#17365d}
+.cgu-weighted-exam-cell small{color:#64748b;font-size:9px}
+.cgu-weighted-exam-cell strong{font-size:16px;color:#0f2748;margin-top:3px}
+.cgu-weighted-exam-cell>span{font-size:9px;color:#475569}
+.cgu-weighted-summary{margin-top:9px;display:flex;gap:10px 18px;align-items:center;flex-wrap:wrap;font-size:11px}
+.cgu-weighted-summary>b{color:#17365d;font-size:13px}
+.cgu-weighted-summary>span{color:#475569}
+.cgu-weighted-disclaimer{font-size:9px;line-height:1.5;color:#64748b;margin:7px 0 0}
+@media(max-width:850px){.cgu-weighted-exam-grid{grid-template-columns:1fr}.cgu-weighted-line strong{font-size:12px}}
