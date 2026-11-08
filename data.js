@@ -68,7 +68,7 @@ const EDITAL=[...EDITAL_P1,...EDITAL_P2,...EDITAL_P3];
       await loadScript("discursive-structure-fix.js?v=20261031-2","discursiveStructureFix");
       // Última camada do Plano: evita rerender global e remove textos redundantes.
       await loadScript("plan-focus-ui.js?v=20261104-1","planFocusUi");
-      await loadScript("weighted-score-ui.js?v=20261108-2","weightedScoreUi");
+      await loadScript("weighted-score-ui.js?v=20261108-3","weightedScoreUi");
       if(typeof renderAll==="function")renderAll();
       if(typeof window.CGU_renderEditalTimeline==="function")window.CGU_renderEditalTimeline();
       if(typeof window.CGU_optimizeDashboard==="function")window.CGU_optimizeDashboard();
