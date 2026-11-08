@@ -96,7 +96,7 @@
     const kpi=document.getElementById("kpis");
     if(!kpi)return;
     const items=examProjection();
-    const allReady=items.every(x=>x.q>0);
+    const allReady=items.every(x=>x.q>=10);
     const projected=allReady?items.reduce((sum,x)=>sum+x.projected,0):null;
     let area=document.getElementById("cguWeightedExam");
     if(!area){
@@ -113,8 +113,31 @@
       ).join("")+'</div>'+
       '<div class="cgu-weighted-summary">'+
         '<b>'+(projected===null?'Projeção total indisponível':"Projeção indicativa: "+fmt(projected,1)+" / 260")+'</b>'+
-        '<span>'+(projected===null?'Registre questões em P1, P2 e P3 antes de estimar a nota total.':'Meta competitiva pessoal: 210–230 / 260, alvo 220. Diferença para 220: '+fmt(220-projected,1)+' pontos.')+'</span>'+
+        '<span>'+(projected===null?'Registre pelo menos 10 questões em cada prova (P1, P2 e P3) para liberar uma estimativa global preliminar.':'Meta competitiva pessoal: 210–230 / 260, alvo 220. Diferença para 220: '+fmt(220-projected,1)+' pontos.')+'</span>'+
       '</div><p class="cgu-weighted-disclaimer">Estimativa matemática, não nota oficial nem previsão de classificação: extrapola o desempenho atual das últimas rodadas para 40 itens de P1, 40 de P2 e 90 de P3. A banca não fixa quantidade por tópico; amostras pequenas podem distorcer a projeção.</p>';
+    // Evita mensagens concorrentes com projeções antigas baseadas na média de toda a amostra.
+    const panel=document.getElementById("performanceVsTarget");
+    const signal=panel?.querySelector(".perf-signal");
+    if(signal){
+      signal.classList.remove("ok","medium","bad");
+      const status=!allReady?"Projeção geral ainda incompleta":projected>=230?"Acima da meta superior (estimativa)":projected>=210?"Na faixa-alvo (estimativa)":"Abaixo da faixa-alvo (estimativa)";
+      const message=!allReady
+        ?"Faltam amostras de pelo menos 10 questões em "+items.filter(p=>p.q<10).map(p=>p.exam).join(", ")+". Não é possível calcular uma estimativa global."
+        :"Extrapolação por prova: "+fmt(projected,1)+"/260 pontos. Sua meta pessoal é 210–230; valide em simulados completos.";
+      signal.classList.add(allReady&&projected>=210?"ok":"medium");
+      signal.innerHTML="<span>"+status+"</span><small>"+message+"</small>";
+    }
+    const panelNote=panel?.querySelector(".perf-note");
+    if(panelNote&&!allReady){
+      panelNote.classList.remove("ok");
+      panelNote.classList.add("medium");
+      panelNote.innerHTML="<b>Projeção total não liberada.</b><span>A estimativa exige ao menos 10 questões em cada prova. Nota final e classificação não são previsíveis por esta amostra.</span>";
+    }
+    const panelSample=panel?.querySelectorAll(".perf-summary>div")[2];
+    if(panelSample){
+      const label=panelSample.querySelector("span");
+      if(label)label.textContent="Líquido ponderado da amostra";
+    }
     kpi.querySelectorAll(".kpi").forEach(card=>{
       const label=card.querySelector(".l")?.textContent?.trim();
       const v=card.querySelector(".v"),detail=card.querySelector(".dash-kpi-detail");
