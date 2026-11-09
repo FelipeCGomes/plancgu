@@ -205,16 +205,16 @@
   }
   function qMin(topicId){return Math.max(10,n(window.CGU_questionRoundMinimum?.(topicId)||10))}
   function roundFields(prefix,id,defaultQ){
-    const min=qMin(id),v=defaultQ||Math.max(min,15);
+    const min=qMin(id);
     return '<div class="s28-fields" data-s28-fields="'+esc(prefix)+'">'+
-      '<div><label>Total</label><input type="number" min="'+min+'" step="1" data-s28-q placeholder="Mín. '+min+'" value="'+v+'"></div>'+
+      '<div><label>Total</label><input type="number" min="'+min+'" step="1" data-s28-q placeholder="Mín. '+min+'"></div>'+
       '<div><label>Acertos</label><input type="number" min="0" step="1" data-s28-a placeholder="Acertos"></div>'+
-      '<div><label>Em branco</label><input type="number" min="0" step="1" data-s28-b value="0"></div>'+
+      '<div><label>Em branco</label><input type="number" min="0" step="1" data-s28-b placeholder="0"></div>'+
       '<div><label>Erros</label><small>Calculados ao salvar</small></div></div>';
   }
   function mockFields(day,t){
     if(t.kind==="fullMock"){
-      return '<div class="s28-pair-grid" style="grid-template-columns:repeat(3,minmax(0,1fr))">'+["P1","P2","P3"].map(exam=>
+      return '<div class="s28-pair-grid s28-full-grid">'+["P1","P2","P3"].map(exam=>
         '<div class="s28-pair-part" data-s28-exam="'+exam+'"><b>'+exam+' — '+LIMIT[exam]+' itens · peso '+WEIGHT[exam]+'</b>'+
         '<div class="s28-fields form-full">'+
         '<div><label>Acertos</label><input type="number" step="1" min="0" max="'+LIMIT[exam]+'" data-s28-a placeholder="0 a '+LIMIT[exam]+'"></div>'+
