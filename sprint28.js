@@ -26,6 +26,7 @@
   function dateAt(i){const d=dateObj(START);d.setDate(d.getDate()+i);return iso(d)}
   function today(){return iso(new Date())}
   function fmtDate(d){return dateObj(d).toLocaleDateString("pt-BR",{day:"2-digit",month:"2-digit",weekday:"short"})}
+  function warn(message){window.CGUFeedback?.cancel?.();alert(message)}
   function fmt(v,d=0){return Number(v).toLocaleString("pt-BR",{minimumFractionDigits:d,maximumFractionDigits:d})}
   function esc(s){return typeof escapeHtml==="function"?escapeHtml(s):String(s||"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]))}
   function plans(){return window.CGU_readDailyPlans?.()||{}}
@@ -116,7 +117,9 @@
       if(lane==="P2")tasks.push(task("bridge","bridge","Ponte para Q1 (30 linhas)",10,{topicId:pair?.b||main?.id,description:"Em 10 minutos: tese, 2 argumentos, 1 exemplo institucional e conectivos. Depois evoluir para texto completo no fim de semana."}));
       else tasks.push(task("bridge","bridge","Casadinha com outro conteúdo",10,{topicId:lane==="P1"?pair?.b:pair?.a,description:pair?.case||"Relacione o tema principal a um problema real de controle e gestão de TI."}));
     }else if(sat){
-      type="saturday";minutes=index===26?120:clamp(n(cfg.satHours)||6,6,9)*60;
+      type="saturday";minutes=index===26?120:clamp(n(cfg.satHours)||6,4,9)*60;
+      if(index===12)minutes=Math.max(minutes,330); // simulado objetivo oficial requer 300 min + correção
+      if(index===19)minutes=Math.max(minutes,240); // simulado P4 oficial requer 210 min
       pair=pairFor(index,date,used);
       const a=byId(pair.a)||choose("P3",date,used,chosen),b=byId(pair.b)||choose("P2",date,used,chosen);
       if(index===26){
@@ -146,7 +149,7 @@
         tasks.push(task("writing","writing","Treino de situação-problema Q2",60,{writingType:"q2",description:pair.case+" Estruture diagnóstico, controles, encaminhamentos e critérios de validação."}));
       }
     }else{
-      type="sunday";minutes=clamp(n(cfg.sunHours)||5,4,8)*60;
+      type="sunday";minutes=clamp(n(cfg.sunHours)||5,3,8)*60;
       pair=pairFor(index,date,used);
       const a=choose("P3",date,used,chosen,pair.a?byId(pair.a)?.g.nome:null)||choose("P3",date,used,chosen);
       if(a){noteUsed(a,used,chosen);tasks.push(task("study-a","study","Aula nova ou recuperação P3",100,{topicId:a.id,description:"Aula direcionada + mapa de arquitetura, comandos e soluções aplicáveis."}))}
@@ -377,8 +380,8 @@
   window.CGU28_saveQuestions=function(date,key){
     const b=load(),t=taskIn(b,date,key);if(!t?.topicId)return;
     const card=document.querySelector('#s28Daily [data-task="'+key+'"]'),data=fields(card);
-    if(!data){alert("Preencha o total, acertos e brancos corretamente; erros são o restante.");return;}
-    const min=qMin(t.topicId);if(data.q<min){alert("Mínimo do tópico: "+min+" questões nesta rodada.");return;}
+    if(!data){warn("Preencha o total, acertos e brancos corretamente; erros são o restante.");return;}
+    const min=qMin(t.topicId);if(data.q<min){warn("Mínimo do tópico: "+min+" questões nesta rodada.");return;}
     feedbackStart("Registrando rodada...");
     saveTopicRound(t.topicId,data.q,data.a,data.b,"reta-final-28");
     b.days[date].checks={...(b.days[date].checks||{}),[key]:true};
@@ -394,9 +397,9 @@
       const parts={};let sum=0;
       for(const exam of ["P1","P2","P3"]){
         const el=card.querySelector('[data-s28-exam="'+exam+'"]'),aEl=el?.querySelector("[data-s28-a]"),bEl=el?.querySelector("[data-s28-b]");
-        if(!aEl||aEl.value===""){alert("Preencha os acertos de "+exam+" antes de salvar o simulado.");return;}
+        if(!aEl||aEl.value===""){warn("Preencha os acertos de "+exam+" antes de salvar o simulado.");return;}
         const a=Number(aEl.value),b=Number(bEl?.value),q=LIMIT[exam],e=q-a-b;
-        if(!Number.isInteger(a)||!Number.isInteger(b)||a<0||b<0||e<0){alert("Confira os acertos e brancos em "+exam+".");return;}
+        if(!Number.isInteger(a)||!Number.isInteger(b)||a<0||b<0||e<0){warn("Confira os acertos e brancos em "+exam+".");return;}
         const net=(a-e)*WEIGHT[exam];parts[exam]={q,a,b,e,net,max:q*WEIGHT[exam]};sum+=net;
       }
       feedbackStart("Salvando simulado integral...");
@@ -406,8 +409,8 @@
       const ids=[t.pair?.a,t.pair?.b].filter(Boolean),input=[];
       for(let i=0;i<ids.length;i++){
         const el=card.querySelector('[data-s28-pair="'+i+'"]'),d=fields(el),min=qMin(ids[i]);
-        if(!d){alert("Preencha total, acertos e brancos dos dois subitens da casadinha.");return;}
-        if(d.q<min){alert("O subitem "+(i+1)+" precisa de pelo menos "+min+" questões.");return;}
+        if(!d){warn("Preencha total, acertos e brancos dos dois subitens da casadinha.");return;}
+        if(d.q<min){warn("O subitem "+(i+1)+" precisa de pelo menos "+min+" questões.");return;}
         input.push({id:ids[i],...d});
       }
       if(!input.length)return;
@@ -425,7 +428,7 @@
     else if(typeof toast==="function")toast("Abra a aba Discursivas / P4 no menu.");
   };
   window.CGU28_saveHours=function(){
-    const a=clamp(n(document.getElementById("s28Sat")?.value)||6,6,9),s=clamp(n(document.getElementById("s28Sun")?.value)||5,4,8);
+    const a=clamp(n(document.getElementById("s28Sat")?.value)||6,4,9),s=clamp(n(document.getElementById("s28Sun")?.value)||5,3,8);
     const b=load();b.settings.satHours=a;b.settings.sunHours=s;
     feedbackStart("Atualizando horários...");
     updateAfter(b,"Cargas dos próximos dias não iniciados ajustadas.");
@@ -435,7 +438,7 @@
   };
   window.CGU28_saveComp=function(){
     const b=load(),c=competitionDraft();
-    if(c.ac!=null&&c.total!=null&&c.ac>c.total){alert("Inscritos AC não podem superar o total de inscritos no cargo.");return;}
+    if(c.ac!=null&&c.total!=null&&c.ac>c.total){warn("Inscritos AC não podem superar o total de inscritos no cargo.");return;}
     b.competition=c;feedbackStart("Salvando estimativas...");
     write(b);feedbackEnd();window.CGU28_previewComp();if(typeof toast==="function")toast("Parâmetros hipotéticos salvos no Firebase.");
   };
@@ -452,8 +455,8 @@
     const page=document.createElement("section");page.id="page-sprint28";page.className="page";
     page.innerHTML='<div class="hero s28-header"><div><h2>Reta final · 28 dias</h2><p>16/11 a 13/12/2026 · Cargo 3 AFFC — Infraestrutura de TI</p></div><span class="badge p3">P3: 180/260 pts · Q2: 70/100 pts</span></div>'+
       '<div id="s28KPIs" class="s28-kpis"></div><div class="s28-progress" aria-label="Progresso de tarefas"><i id="s28Progress" role="progressbar" aria-valuemin="0" aria-valuemax="100"></i></div>'+
-      '<div class="s28-card" style="margin-bottom:12px"><h3>Jornada realista e adaptável</h3><div class="s28-subline">Segunda a sexta: <b>04:00–05:20 (80 min)</b>, um subitem principal + questões + conexão. Sábados e domingos: conteúdos novos, simulados combinados, treino Q1/Q2 e correção. Véspera da prova: carga reduzida para descanso. Tarefas já iniciadas não são substituídas automaticamente; as futuras podem mudar conforme seu desempenho. Todos os temas vêm do Edital cadastrado.</div>'+
-      '<div class="s28-config"><div><label>Horas por sábado (exceto véspera)</label><input id="s28Sat" type="number" min="6" max="9" step="1"></div><div><label>Horas por domingo</label><input id="s28Sun" type="number" min="4" max="8" step="1"></div><button class="s28-action" type="button" onclick="CGU28_saveHours()">Salvar horas</button></div>'+
+      '<div class="s28-card" style="margin-bottom:12px"><h3>Jornada realista e adaptável</h3><div class="s28-subline">Segunda a sexta: <b>04:00–05:20 (80 min)</b>, um subitem principal + questões + conexão. Sábados e domingos: conteúdos novos, simulados combinados, treino Q1/Q2 e correção. Véspera da prova: carga reduzida para descanso. Os simulados integrais preservam suas durações oficiais mínimas. Tarefas já iniciadas não são substituídas automaticamente; as futuras podem mudar conforme seu desempenho. Todos os temas vêm do Edital cadastrado.</div>'+
+      '<div class="s28-config"><div><label>Horas por sábado (exceto véspera)</label><input id="s28Sat" type="number" min="4" max="9" step="1"></div><div><label>Horas por domingo</label><input id="s28Sun" type="number" min="3" max="8" step="1"></div><button class="s28-action" type="button" onclick="CGU28_saveHours()">Salvar horas</button></div>'+
       '<div class="s28-subline">Nota: 28º dia é a prova. O volume é referência, não obrigação inflexível. A seleção estratégica não equivale a previsão oficial de temas.</div></div>'+
       '<div class="s28-layout"><div class="s28-card"><h3>Calendário adaptativo</h3>'+
       '<div class="s28-toolbar"><button data-filter="todos" class="s28-chip on" onclick="CGU28_filter(\'todos\')">Todos</button><button data-filter="pendentes" class="s28-chip" onclick="CGU28_filter(\'pendentes\')">Pendentes</button><button data-filter="simulados" class="s28-chip" onclick="CGU28_filter(\'simulados\')">Simulados</button><button data-filter="discursivas" class="s28-chip" onclick="CGU28_filter(\'discursivas\')">P4</button></div>'+
