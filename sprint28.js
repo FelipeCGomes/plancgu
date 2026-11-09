@@ -17,7 +17,7 @@
     {name:"Continuidade + governança e responsabilização",a:["P3","Continuidade e Recuperação"],b:["P2","Governança e Responsabilidades"],case:"Projetar resposta, continuidade, testes de recuperação, responsabilidades e prestação de contas."}
   ];
   const PREF={satHours:6,sunHours:5};
-  let selected=START, dayFilter="todos", ready=false;
+  let selected=START, dayFilter="todos", ready=false, cachedDeferrals=null, cachedSettings=null;
 
   function n(v){const r=Number(v);return Number.isFinite(r)?Math.max(0,r):0}
   function clamp(v,min,max){return Math.max(min,Math.min(max,v))}
@@ -45,7 +45,7 @@
   function byId(id){return allRows().find(x=>x.id===id)||null}
   function priority(x){return ({Crítica:4,Alta:3,Média:2,Baixa:1}[x?.priority]||1)}
   function blocked(x,ymd){
-    const d=plans().__deferrals||{},t=d.topics?.[x.id],s=d.subjects?.[x.d.id];
+    const d=cachedDeferrals||plans().__deferrals||{},t=d.topics?.[x.id],s=d.subjects?.[x.d.id];
     return !!((t?.until&&ymd<t.until&&!t.cancelledAtMs)||(s?.until&&ymd<s.until&&!s.cancelledAtMs));
   }
   function importance(x){
@@ -98,7 +98,7 @@
       return {...prior,date,index};
     }
     const weekday=dateObj(date).getDay(),sat=weekday===6,sun=weekday===0,week=Math.floor(index/7);
-    const cfg=load().settings;
+    const cfg=cachedSettings||load().settings;
     if(date===EXAM)return {date,index,type:"exam",title:"Dia da prova · CGU 2026",minutes:0,tasks:[],pair:null,locked:false,tip:"Prova objetiva pela manhã e discursiva à tarde. Preserve sono, documentos, deslocamento e alimentação. Nada de simulado pesado."};
     const chosen=[],tasks=[];
     let type="weekday",title="",tip="",minutes=80,pair=null;
@@ -161,12 +161,16 @@
     return {date,index,type,title,tip,pair,minutes,tasks,locked:false};
   }
   function makeSchedule(){
-    const b=load(),used={},days=[];
-    for(let i=0;i<DURATION;i++){
-      const date=dateAt(i),p=generate(date,i,used,b.days[date]);
-      days.push(p);
-    }
-    return days;
+    const p=plans(),b=p[META]||{},used={},days=[];
+    cachedDeferrals=p.__deferrals||{};
+    cachedSettings={...PREF,...(b.settings||{})};
+    try{
+      for(let i=0;i<DURATION;i++){
+        const date=dateAt(i),p=generate(date,i,used,b.days?.[date]);
+        days.push(p);
+      }
+      return days;
+    }finally{cachedDeferrals=null;cachedSettings=null}
   }
   function p4Entries(){return window.CGU_P4Store?.read?.()?.entries||[]}
   function written(date,type){
