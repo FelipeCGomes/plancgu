@@ -98,12 +98,12 @@
       prior.tasks.forEach(t=>{if(t.kind==="study"&&t.topicId){const x=byId(t.topicId);if(x)noteUsed(x,used,[]) }});
       return {...prior,date,index};
     }
-    const weekday=dateObj(date).getDay(),sat=weekday===6,sun=weekday===0,week=Math.floor(index/7);
+    const weekday=dateObj(date).getDay(),sat=weekday===6,sun=weekday===0,holiday=date==="2026-11-20",week=Math.floor(index/7);
     const cfg=cachedSettings||load().settings;
     if(date===EXAM)return {date,index,type:"exam",title:"Dia da prova · CGU 2026",minutes:0,tasks:[],pair:null,locked:false,tip:"Prova objetiva pela manhã e discursiva à tarde. Preserve sono, documentos, deslocamento e alimentação. Nada de simulado pesado."};
     const chosen=[],tasks=[];
     let type="weekday",title="",tip="",minutes=80,pair=null;
-    if(!sat&&!sun){
+    if(!sat&&!sun&&!holiday){
       const lane=["P3","P2","P3","P1","P3"][weekday-1]||"P3";
       const main=choose(lane,date,used,chosen)||choose(null,date,used,chosen);
       noteUsed(main,used,chosen);
@@ -149,7 +149,7 @@
         tasks.push(task("writing","writing","Treino de situação-problema Q2",60,{writingType:"q2",description:pair.case+" Estruture diagnóstico, controles, encaminhamentos e critérios de validação."}));
       }
     }else{
-      type="sunday";minutes=clamp(n(cfg.sunHours)||5,3,8)*60;
+      type=holiday?"holiday":"sunday";minutes=clamp(n(cfg.sunHours)||5,3,8)*60;
       pair=pairFor(index,date,used);
       const a=choose("P3",date,used,chosen,pair.a?byId(pair.a)?.g.nome:null)||choose("P3",date,used,chosen);
       if(a){noteUsed(a,used,chosen);tasks.push(task("study-a","study","Aula nova ou recuperação P3",100,{topicId:a.id,description:"Aula direcionada + mapa de arquitetura, comandos e soluções aplicáveis."}))}
@@ -158,7 +158,7 @@
       tasks.push(task("pair","pairMock","Casadinha P2/P3 · "+pair.name,60,{pair,description:pair.case}));
       tasks.push(task("writing","writing","Redação Q1 — até 30 linhas",60,{writingType:"q1",description:"Texto com introdução, dois argumentos, aplicação ao órgão e conclusão. Registrar avaliação na P4."}));
       tasks.push(task("case-outline","bridge","Esqueleto do estudo de caso Q2",30,{description:pair.case+" Faça 4 tópicos: diagnóstico, medidas, implementação e evidências para validar a solução."}));
-      title="Domingo de avanço + redação";
+      title=holiday?"Feriado de avanço + redação":"Domingo de avanço + redação";
       tip="Não é domingo só de revisão: inclui dois conteúdos, simulado transversal, Q1 e esqueleto de Q2; a duração de cada bloco se ajusta às horas escolhidas."
     }
     fit(tasks,minutes);
@@ -465,6 +465,19 @@
       '<div id="s28CompInputs"></div><div id="s28CompOutput"></div>'+
       '<p class="s28-comp-notice">Fonte oficial: <a href="https://www.cebraspe.org.br/concursos/cgu_26_affc" target="_blank" rel="noopener noreferrer">Cebraspe · CGU 26 AFFC</a>. Percentuais de abstenção e preparo nesta calculadora são inteiramente configuráveis e ilustrativos.</p></div>'+
       '<div class="s28-card" style="margin-top:12px"><h3>Regras da seleção estratégica</h3><div class="s28-subline">1) Primeiro, subitens <b>não concluídos</b>, críticos e sem amostra. 2) <b>P3 recebe maior peso</b> pelo limite de 180/260 pontos e também alimenta o estudo de caso Q2 (70 pontos). 3) P2 integra teoria e redação Q1 (30 pontos). 4) Baixo líquido na <b>última rodada</b> eleva a necessidade de recuperação; 5) Casadinhas P2/P3 e P1/P3 geram simulados interdisciplinares. 6) Os temas mais prováveis são <b>hipóteses de prioridade</b>, nunca frequências oficiais divulgadas. Meta pessoal objetiva de 210–230/260 e treino P4 de 85+/100; nenhuma dessas metas garante a classificação.</div></div>';
+    // Semana preparatória: o ciclo começa exatamente 28 dias antes da prova,
+    // mas o usuário já pode estudar 80 minutos nas manhãs de 09 a 13/11.
+    if(today()<START){
+      const x=choose("P3",today(),{},[])||choose(null,today(),{},[]);
+      const warmup=document.createElement("div");
+      warmup.className="s28-card";warmup.style.marginBottom="12px";
+      warmup.innerHTML='<h3>Comece agora · preparação de 09 a 15/11</h3>'+
+        '<div class="s28-subline">Antes de D1, use as manhãs de segunda a sexta <b>04:00–05:20</b>: 10 min de recuperação ativa, 45 min do subitem abaixo e 25 min de questões Cebraspe. No fim de semana, faça 1 treino Q1, 1 esqueleto Q2 e avance em conteúdo P3. Esta semana não substitui nem antecipa os 28 dias do calendário.</div>'+
+        (x?'<div class="s28-logic">Prioridade sugerida agora: <b>'+esc(fullTitle(x))+'</b> · '+esc(x.d.nome)+' · '+esc(x.priority)+'</div>':'');
+      const hero=page.querySelector(".hero");hero?.insertAdjacentElement("afterend",warmup);
+    }
+    const oldNav=nav?.querySelector('[data-page="hoje"]');
+    if(oldNav)oldNav.textContent="🎯 Plano tradicional · 3h";
     const review=document.getElementById("page-revisar");
     if(review)review.insertAdjacentElement("beforebegin",page);else main.appendChild(page);
     const original=window.switchPage;
