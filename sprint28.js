@@ -204,7 +204,13 @@
   function resultsFor(day,t,b){
     const result=b.mocks[day.date]?.[t.id];
     if(!result)return "";
-    if(t.kind==="fullMock")return '<div class="s28-result">Simulado registrado: '+fmt(result.total)+' / 260 pontos líquidos (P1 '+fmt(result.parts.P1.net)+'; P2 '+fmt(result.parts.P2.net)+'; P3 '+fmt(result.parts.P3.net)+'). Meta pessoal: 210–230/260.</div>';
+    if(t.kind==="fullMock"){
+      const pass=result.parts.P1.net>=8&&result.parts.P2.net>=12&&result.parts.P3.net>=54&&result.total>=78;
+      const nfc=result.total/26+8.5;
+      return '<div class="s28-result">Simulado registrado: <b>'+fmt(result.total)+' / 260 pts líquidos</b> (P1 '+fmt(result.parts.P1.net)+'; P2 '+fmt(result.parts.P2.net)+'; P3 '+fmt(result.parts.P3.net)+'). '+
+        (pass?'✓ Acima dos mínimos objetivos eliminatórios.':'⚠ Abaixo de pelo menos um mínimo eliminatório por bloco ou total. ')+
+        'Meta pessoal: 210–230/260. NFC hipotética se P4 fosse 85/100: <b>'+fmt(nfc,2)+'/20</b> (não é classificação projetada).</div>';
+    }
     return '<div class="s28-result">Casadinha registrada: '+result.parts.map(p=>esc(p.exam)+' '+fmt(p.net)+'/'+fmt(p.max)+' pts').join(" · ")+'</div>';
   }
   function qMin(topicId){return Math.max(10,n(window.CGU_questionRoundMinimum?.(topicId)||10))}
