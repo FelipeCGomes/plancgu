@@ -115,7 +115,7 @@
         tasks.push(task("questions","questions","Rodada Cebraspe do mesmo subitem",25,{topicId:main.id,description:"Registre total, acertos e brancos; os erros e a nota ponderada serão calculados automaticamente."}));
       }
       if(lane==="P2")tasks.push(task("bridge","bridge","Ponte para Q1 (30 linhas)",10,{topicId:pair?.b||main?.id,description:"Em 10 minutos: tese, 2 argumentos, 1 exemplo institucional e conectivos. Depois evoluir para texto completo no fim de semana."}));
-      else tasks.push(task("bridge","bridge","Casadinha com outro conteúdo",10,{topicId:lane==="P1"?pair?.b:pair?.a,description:pair?.case||"Relacione o tema principal a um problema real de controle e gestão de TI."}));
+      else tasks.push(task("bridge","bridge","Casadinha com outro conteúdo",10,{topicId:lane==="P3"?pair?.b:pair?.a,description:pair?.case||"Relacione o tema principal a um problema real de controle e gestão de TI."}));
     }else if(sat){
       type="saturday";minutes=index===26?120:clamp(n(cfg.satHours)||6,4,9)*60;
       if(index===12)minutes=Math.max(minutes,330); // simulado objetivo oficial requer 300 min + correção
