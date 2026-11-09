@@ -153,9 +153,10 @@
       const b=choose("P2",date,used,chosen,pair.b?byId(pair.b)?.g.nome:null)||choose("P1",date,used,chosen);
       if(b){noteUsed(b,used,chosen);tasks.push(task("study-b","study","Complementares e repertório Q1",80,{topicId:b.id,description:"Construir ponte entre governança, transparência, risco e responsabilidade."}))}
       tasks.push(task("pair","pairMock","Casadinha P2/P3 · "+pair.name,60,{pair,description:pair.case}));
-      tasks.push(task("writing","writing","Redação Q1 — 30 linhas",60,{writingType:"q1",description:"Texto com introdução, dois argumentos, aplicação ao órgão e conclusão. Registrar avaliação na P4."}));
+      tasks.push(task("writing","writing","Redação Q1 — até 30 linhas",60,{writingType:"q1",description:"Texto com introdução, dois argumentos, aplicação ao órgão e conclusão. Registrar avaliação na P4."}));
+      tasks.push(task("case-outline","bridge","Esqueleto do estudo de caso Q2",30,{description:pair.case+" Faça 4 tópicos: diagnóstico, medidas, implementação e evidências para validar a solução."}));
       title="Domingo de avanço + redação";
-      tip="Não é domingo só de revisão: inclui dois conteúdos, simulado transversal e escrita de conhecimentos complementares.";
+      tip="Não é domingo só de revisão: inclui dois conteúdos, simulado transversal, Q1 e esqueleto de Q2; a duração de cada bloco se ajusta às horas escolhidas."
     }
     fit(tasks,minutes);
     return {date,index,type,title,tip,pair,minutes,tasks,locked:false};
