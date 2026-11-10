@@ -76,3 +76,13 @@
 .s28-task > .s28-actions > div{width:100%}
 .s28-full-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
 @media(max-width:850px){.s28-full-grid{grid-template-columns:1fr}}
+
+/* Intensivão 34 dias: sessões manhã/noite e registros formativos. */
+.s28-formative{display:block;font-size:10px;color:#7c2d12;background:#fffbeb;border:1px solid #fde68a;border-radius:7px;margin:0 0 8px;padding:7px 9px}
+.s28-writing-banner{font-size:11px;line-height:1.45;background:#eff6ff;color:#1e40af;border:1px solid #bfdbfe;padding:9px 11px;margin-bottom:10px;border-radius:9px}
+#page-sprint28 .s28-day-btn.selected{box-shadow:inset 3px 0 0 #2563eb}
+#page-sprint28 .s28-day-btn .s28-day-type{display:block}
+#page-sprint28 .s28-task header small{font-size:10px;color:#475569}
+#page-sprint28 .s28-task .s28-topic{font-size:11px}
+#page-sprint28 .s28-logic{font-size:10px}
+@media(max-width:650px){#page-sprint28 .s28-detail-head{flex-direction:column}#page-sprint28 .s28-fields{grid-template-columns:repeat(2,minmax(0,1fr))}#page-sprint28 .s28-fields.form-full{grid-template-columns:repeat(2,minmax(0,1fr))}}
