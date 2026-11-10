@@ -64,7 +64,7 @@ function sprintHarness(){
     requestAnimationFrame:fn=>fn(),setTimeout,Date,console,Math
   };
   const source=file("sprint28.js").replace(/\s*setup\(\);\s*\}\)\(\);\s*$/,
-    "\n  window.__test34={makeSchedule,load,progress,mockFields,resultsFor};\n})();");
+    "\n  window.__test34={makeSchedule,load,progress,mockFields,resultsFor,goalSnapshot};\n})();");
   assert.ok(source.includes("window.__test34="),"Não foi possível neutralizar a montagem da interface para os testes");
   vm.runInNewContext(source,context,{filename:"sprint28.js",timeout:3000});
   return {api:context.window,__test:context.window.__test34,rows,topicState,savedPlans,alerts,events,dom};
@@ -183,6 +183,28 @@ test("Firestore recebe no snapshot o estado e o calendário da reta final",()=>{
   ctx.save();
   assert.equal(record.at(-1).state.mock.questoes,20);
   assert.equal(record.at(-1).state.mock.erros,2);
+});
+
+test("Metas competitivas: 210/260 objetiva e 85/100 P4, sem alterar máximos oficiais",()=>{
+  const h=sprintHarness();
+  const g=h.__test.goalSnapshot();
+  assert.equal(Object.values(g.blocks).reduce((sum,v)=>sum+v.goal,0),210);
+  assert.equal(g.blocks.P1.max,40);
+  assert.equal(g.blocks.P2.max,40);
+  assert.equal(g.blocks.P3.max,180);
+  assert.equal(g.objective,null,"Sem amostras completas, não deve inventar nota.");
+  assert.equal(g.p4,null,"Sem Q1 e Q2 válidas, não deve inventar média.");
+
+  // Q1 = 25,5/30; Q2 = 59,5/70; juntas alcançam o alvo de 85/100.
+  h.savedPlans.value.__discursiveTrackerV1={entries:[
+    {id:"q1-valid",date:"2026-11-22",type:"q1",training:false,lines:30,nc:25.5,spelling:0,syntax:0,vocab:0,otherLang:0},
+    {id:"q2-valid",date:"2026-11-22",type:"q2",training:false,lines:60,nc:59.5,spelling:0,syntax:0,vocab:0,otherLang:0},
+    {id:"short-train",date:"2026-12-11",type:"q1",training:true,lines:15,nc:30}
+  ]};
+  const after=h.__test.goalSnapshot();
+  assert.equal(after.q1,25.5);
+  assert.equal(after.q2,59.5);
+  assert.equal(after.p4,85);
 });
 
 test("A rota principal mostra 34 dias e a projeção não mistura pesos",()=>{
