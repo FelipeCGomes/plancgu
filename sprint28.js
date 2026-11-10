@@ -5,7 +5,7 @@
 */
 (() => {
   const META="__sprint34V1", START="2026-11-10", EXAM="2026-12-13", DURATION=34;
-  const WEIGHT={P1:1,P2:1,P3:2}, LIMIT={P1:40,P2:40,P3:90};
+  const WEIGHT={P1:1,P2:1,P3:2}, LIMIT={P1:40,P2:40,P3:90}, HALF_LIMIT={P1:20,P2:20,P3:45};
   const PAIRS=[
     {name:"Segurança da infraestrutura + gestão de riscos",a:["P3","Riscos e Arquitetura de Segurança"],b:["P2","Riscos e Controles Essenciais"],case:"Aplicar defesa em profundidade, risco residual e controles proporcionais em serviço digital da CGU."},
     {name:"Operação de segurança + transparência e privacidade",a:["P3","Vulnerabilidades e Operação de Segurança"],b:["P2","Transparência e Proteção de Dados"],case:"Tratar incidente, evidências, comunicação e proteção de dados sem interromper o serviço."},
@@ -31,12 +31,12 @@
   function esc(s){return typeof escapeHtml==="function"?escapeHtml(s):String(s||"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]))}
   function plans(){return window.CGU_readDailyPlans?.()||{}}
   function load(){
-    const b=plans()[META]||{};
-    return {version:1,days:b.days||{},mocks:b.mocks||{},settings:{...PREF,...(b.settings||{})},
-      competition:{total:null,ac:null,absence:25,below:65,...(b.competition||{})},updatedAtMs:Number(b.updatedAtMs)||0};
+    const p=plans(),b=p[META]||{},legacy=p.__sprint28V1||{};
+    return {version:2,days:b.days||{},mocks:b.mocks||{},settings:{...PREF,...(legacy.settings||{}),...(b.settings||{})},
+      competition:{total:null,ac:null,absence:25,below:65,...(legacy.competition||{}),...(b.competition||{})},updatedAtMs:Number(b.updatedAtMs)||0};
   }
   function write(b){
-    const p=plans();p[META]={...b,version:1,updatedAtMs:Date.now()};
+    const p=plans();p[META]={...b,version:2,updatedAtMs:Date.now()};
     if(typeof window.CGU_writeDailyPlans==="function")window.CGU_writeDailyPlans(p);
     else{localStorage.setItem(KEY+"-daily-plans-v1",JSON.stringify(p));window.dispatchEvent(new Event("cgu-plan-changed"))}
   }
@@ -240,7 +240,7 @@
     if(!t)return false;
     if(t.kind==="writing")return !!(b.days[day.date]?.checks?.[t.id]||written(day.date,t.writingType));
     if(t.kind==="fullDisc")return !!(b.days[day.date]?.checks?.[t.id]||(written(day.date,"q1")&&written(day.date,"q2")));
-    if(t.kind==="fullMock"||t.kind==="pairMock")return !!(b.mocks[day.date]?.[t.id]);
+    if(t.kind==="fullMock"||t.kind==="halfMock"||t.kind==="pairMock")return !!(b.mocks[day.date]?.[t.id]);
     if(t.kind==="study"){
       const s=t.topicId?getTS(t.topicId):null;
       return !!(b.days[day.date]?.checks?.[t.id]||s?.done);
@@ -259,6 +259,9 @@
   function resultsFor(day,t,b){
     const result=b.mocks[day.date]?.[t.id];
     if(!result)return "";
+    if(t.kind==="halfMock"){
+      return '<div class="s28-result">Meio simulado: <b>'+fmt(result.total)+'/130 pontos líquidos</b> · P1 '+fmt(result.parts.P1.net)+'/20 · P2 '+fmt(result.parts.P2.net)+'/20 · P3 '+fmt(result.parts.P3.net)+'/90. Resultado formativo, não equivale à nota oficial nem altera as notas por tópico.</div>';
+    }
     if(t.kind==="fullMock"){
       const pass=result.parts.P1.net>=8&&result.parts.P2.net>=12&&result.parts.P3.net>=54&&result.total>=78;
       const nfc=result.total/26+8.5;
@@ -278,12 +281,13 @@
       '<div><label>Erros</label><small>Calculados ao salvar</small></div></div>';
   }
   function mockFields(day,t){
-    if(t.kind==="fullMock"){
+    if(t.kind==="fullMock"||t.kind==="halfMock"){
+      const limits=t.kind==="halfMock"?HALF_LIMIT:LIMIT;
       return '<div class="s28-pair-grid s28-full-grid">'+["P1","P2","P3"].map(exam=>
-        '<div class="s28-pair-part" data-s28-exam="'+exam+'"><b>'+exam+' — '+LIMIT[exam]+' itens · peso '+WEIGHT[exam]+'</b>'+
+        '<div class="s28-pair-part" data-s28-exam="'+exam+'"><b>'+exam+' — '+limits[exam]+' itens · peso '+WEIGHT[exam]+'</b>'+
         '<div class="s28-fields form-full">'+
-        '<div><label>Acertos</label><input type="number" step="1" min="0" max="'+LIMIT[exam]+'" data-s28-a placeholder="0 a '+LIMIT[exam]+'"></div>'+
-        '<div><label>Brancos</label><input type="number" step="1" min="0" max="'+LIMIT[exam]+'" data-s28-b value="0"></div>'+
+        '<div><label>Acertos</label><input type="number" step="1" min="0" max="'+limits[exam]+'" data-s28-a placeholder="0 a '+limits[exam]+'"></div>'+
+        '<div><label>Brancos</label><input type="number" step="1" min="0" max="'+limits[exam]+'" data-s28-b value="0"></div>'+
         '<div><label>Erros</label><small>Automático</small></div></div></div>'
       ).join("")+'</div>';
     }
@@ -299,7 +303,7 @@
       actions='<button class="primary" type="button" onclick="CGU28_toggle(\''+day.date+'\',\''+t.id+'\')">'+(done?"✓ Concluído — reabrir":"✓ Marcar atividade concluída")+'</button>';
     }else if(t.kind==="questions"){
       actions=done?'<span class="s28-result">Rodada registrada</span>':'<div>'+roundFields(day.date+"-"+t.id,t.topicId,Math.max(qMin(t.topicId),10))+'<div class="s28-actions"><button class="primary" type="button" onclick="CGU28_saveQuestions(\''+day.date+'\',\''+t.id+'\')">Registrar rodada neste tópico</button></div></div>';
-    }else if(t.kind==="pairMock"||t.kind==="fullMock"){
+    }else if(t.kind==="pairMock"||t.kind==="fullMock"||t.kind==="halfMock"){
       actions=done?resultsFor(day,t,b):mockFields(day,t)+'<div class="s28-actions"><button class="primary" type="button" onclick="CGU28_saveMock(\''+day.date+'\',\''+t.id+'\')">Salvar resultado do simulado</button></div>';
     }else if(t.kind==="writing"||t.kind==="fullDisc"){
       actions='<span class="s28-subline">'+(done?'✓ Registro localizado no acompanhamento P4.':'O treino só conta automaticamente quando salvo na aba Discursivas / P4. Você também pode marcar um rascunho como feito, sem atribuir nota.')+'</span>'+
@@ -308,7 +312,7 @@
     }
     const last=x?.m?.q?' · última amostra: '+fmt(x.m.q)+' questões · '+fmt(x.m.liquido,1)+'% líquido · peso '+WEIGHT[exam]:'';
     return '<article class="s28-task '+(done?'done':'')+'" data-task="'+t.id+'">'+
-      '<header><strong>'+(done?'✓ ':'')+esc(t.title)+'</strong><small>'+t.minutes+' min'+last+'</small></header>'+
+      '<header><strong>'+(done?'✓ ':'')+esc(t.title)+'</strong><small>'+(t.timeLabel?esc(t.timeLabel)+' · ':'')+t.minutes+' min'+last+'</small></header>'+
       (t.topicId?taskTitle(t):'')+'<p>'+esc(t.description||"")+'</p>'+
       (t.kind==="pairMock"?'<div class="s28-subline">Conexão para Q2: '+esc(t.pair?.case||"")+'</div>':'')+
       '<div class="s28-actions">'+actions+'</div></article>';
@@ -410,7 +414,7 @@
     const canonicalQ=Math.max(oldQ,oldA+oldB+oldE);
     const now=Date.now(),at=new Date(now).toISOString();
     setTS(id,{questoes:canonicalQ+q,acertos:oldA+a,brancos:oldB+b,erros:oldE+e,
-      questionRounds:[...hist,{id:"qr-s28-"+now+"-"+Math.random().toString(36).slice(2,6),at,questoes:q,acertos:a,erros:e,brancos:b,liquidoRodada:q?100*(a-e)/q:null,source}],
+      questionRounds:[...hist,{id:"qr-s34-"+now+"-"+Math.random().toString(36).slice(2,6),at,questoes:q,acertos:a,erros:e,brancos:b,liquidoRodada:q?100*(a-e)/q:null,source}],
       lastQuestionDate:at,lastQuestionSource:source,lastQuestionBatch:{questoes:q,acertos:a,erros:e,brancos:b,data:at.slice(0,10)},updatedAtMs:now,atomicConfirmed:true});
     return {q,a,b,e,exam:byId(id)?.exam||"P3",net:(a-e)*WEIGHT[byId(id)?.exam||"P3"],max:q*WEIGHT[byId(id)?.exam||"P3"]};
   }
@@ -432,8 +436,8 @@
     day.checks={...(day.checks||{}),[key]:next};day.updatedAtMs=Date.now();
     if(t.kind==="study"&&t.topicId){
       const old=getTS(t.topicId)||{};
-      if(next)setTS(t.topicId,{done:true,completedAtMs:Date.now(),completionSource:"sprint28",updatedAtMs:Date.now()});
-      else if(old.completionSource==="sprint28")setTS(t.topicId,{done:false,completedAtMs:null,completionSource:"sprint28-reopened",updatedAtMs:Date.now()});
+      if(next)setTS(t.topicId,{done:true,completedAtMs:Date.now(),completionSource:"sprint34",updatedAtMs:Date.now()});
+      else if(old.completionSource==="sprint34")setTS(t.topicId,{done:false,completedAtMs:null,completionSource:"sprint34-reopened",updatedAtMs:Date.now()});
       try{save()}catch(e){}
     }
     updateAfter(b,next?"Atividade concluída.":"Atividade reaberta.");
@@ -444,28 +448,29 @@
     if(!data){warn("Preencha o total, acertos e brancos corretamente; erros são o restante.");return;}
     const min=qMin(t.topicId);if(data.q<min){warn("Mínimo do tópico: "+min+" questões nesta rodada.");return;}
     feedbackStart("Registrando rodada...");
-    saveTopicRound(t.topicId,data.q,data.a,data.b,"reta-final-28");
+    saveTopicRound(t.topicId,data.q,data.a,data.b,"reta-final-34");
     b.days[date].checks={...(b.days[date].checks||{}),[key]:true};
     try{save()}catch(e){}
     updateAfter(b,"Rodada registrada no tópico e sincronizável com o Edital.");
-    window.dispatchEvent(new CustomEvent("cgu-question-recorded",{detail:{topicId:t.topicId,source:"reta-final-28"}}));
+    window.dispatchEvent(new CustomEvent("cgu-question-recorded",{detail:{topicId:t.topicId,source:"reta-final-34"}}));
   };
   window.CGU28_saveMock=function(date,key){
     const b=load(),t=taskIn(b,date,key);if(!t)return;
     const card=document.querySelector('#s28Daily [data-task="'+key+'"]');
     if(!card)return;
-    if(t.kind==="fullMock"){
+    if(t.kind==="fullMock"||t.kind==="halfMock"){
+      const limits=t.kind==="halfMock"?HALF_LIMIT:LIMIT;
       const parts={};let sum=0;
       for(const exam of ["P1","P2","P3"]){
         const el=card.querySelector('[data-s28-exam="'+exam+'"]'),aEl=el?.querySelector("[data-s28-a]"),bEl=el?.querySelector("[data-s28-b]");
         if(!aEl||aEl.value===""){warn("Preencha os acertos de "+exam+" antes de salvar o simulado.");return;}
-        const a=Number(aEl.value),b=Number(bEl?.value),q=LIMIT[exam],e=q-a-b;
+        const a=Number(aEl.value),b=Number(bEl?.value),q=limits[exam],e=q-a-b;
         if(!Number.isInteger(a)||!Number.isInteger(b)||a<0||b<0||e<0){warn("Confira os acertos e brancos em "+exam+".");return;}
         const net=(a-e)*WEIGHT[exam];parts[exam]={q,a,b,e,net,max:q*WEIGHT[exam]};sum+=net;
       }
-      feedbackStart("Salvando simulado integral...");
-      b.mocks[date]={...(b.mocks[date]||{}),[key]:{type:"integral",parts,total:sum,at:new Date().toISOString()}};
-      updateAfter(b,"Simulado integral salvo: "+fmt(sum)+" / 260 pontos. Não foi atribuído a um único tópico.");
+      feedbackStart(t.kind==="halfMock"?"Salvando meio simulado...":"Salvando simulado integral...");
+      b.mocks[date]={...(b.mocks[date]||{}),[key]:{type:t.kind==="halfMock"?"diagnostico-meio":"integral",parts,total:sum,max:t.kind==="halfMock"?130:260,at:new Date().toISOString()}};
+      updateAfter(b,(t.kind==="halfMock"?"Meio simulado ":"Simulado integral ")+"salvo: "+fmt(sum)+" / "+(t.kind==="halfMock"?130:260)+" pontos. Sem alterar notas dos tópicos.");
     }else if(t.kind==="pairMock"){
       const ids=[t.pair?.a,t.pair?.b].filter(Boolean),input=[];
       for(let i=0;i<ids.length;i++){
