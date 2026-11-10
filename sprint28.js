@@ -247,13 +247,14 @@
         if(m)tasks.push(task("study","study","Reforço P3 aplicado ao estudo de caso",90,{topicId:m.id,description:"Aplicação com diagnóstico e controles técnicos."}));
         tasks.push(task("review","review","Analisar erros de conteúdo e estrutura das duas respostas",60,{description:"Identificar lacunas de comando, lógica e linguagem."}));
       }else{
-        title="Sábado de avanço + casadinha + Q2";
-        tip="Mais que revisão: simulado misto P2/P3, aulas novas e estudo de caso técnico. Divida o total em manhã, tarde e noite conforme sua disponibilidade.";
-        tasks.push(task("pair","pairMock","Simulado casadinha · "+pair.name,120,{pair,description:pair.case}));
-        tasks.push(task("review","review","Corrigir a casadinha e mapear falhas",45,{description:"Classificar erros por lacuna, leitura ou gestão do tempo."}));
-        if(a){tasks.push(task("study-a","study","Aula técnica P3 pendente",75,{topicId:a.id,description:"Avançar em teoria essencial e exemplo aplicável."}));noteUsed(a,used,chosen)}
+        const fullQ2=date==="2026-11-21";
+        title=fullQ2?"Sábado · primeiro Q2 completo e avaliado":"Sábado de avanço + casadinha + Q2";
+        tip="Mais que revisão: simulado misto P2/P3, aulas novas e estudo de caso técnico. Em 21/11, realizar Q2 completa para aferir a meta discursiva de 85/100. Divida o total em manhã, tarde e noite conforme sua disponibilidade.";
+        tasks.push(task("pair","pairMock","Simulado casadinha · "+pair.name,fullQ2?90:120,{pair,description:pair.case}));
+        tasks.push(task("review","review","Corrigir a casadinha e mapear falhas",fullQ2?30:45,{description:"Classificar erros por lacuna, leitura ou gestão do tempo."}));
+        if(a){tasks.push(task("study-a","study","Aula técnica P3 pendente",fullQ2?90:75,{topicId:a.id,description:"Avançar em teoria essencial e exemplo aplicável."}));noteUsed(a,used,chosen)}
         if(b){tasks.push(task("study-b","study","Aula P2 e repertório Q1",60,{topicId:b.id,description:"Estruturar fundamentos institucionais e de controle."}));noteUsed(b,used,chosen)}
-        tasks.push(task("writing","writing","Situação-problema Q2 aplicada",60,{writingType:"q2",targetLines:50,training:true,
+        tasks.push(task("writing","writing",fullQ2?"Q2 completa · aferição rumo aos 85/100":"Situação-problema Q2 aplicada",fullQ2?90:60,{writingType:"q2",targetLines:fullQ2?60:50,training:!fullQ2,
           description:pair.case+" Entregar diagnóstico, ações, governança e validação."}));
       }
     }else{
@@ -264,7 +265,8 @@
       const b=choose("P2",date,used,chosen,pair.b?byId(pair.b)?.g.nome:null)||choose("P1",date,used,chosen);
       if(b){noteUsed(b,used,chosen);tasks.push(task("study-b","study","Aula P2 e preparação Q1",70,{topicId:b.id,description:"Integridade, transparência, governança ou auditoria conforme lacunas."}))}
       tasks.push(task("pair","pairMock","Casadinha P2/P3 · "+pair.name,60,{pair,description:pair.case}));
-      tasks.push(task("writing","writing","Redação Q1 · até 30 linhas",60,{writingType:"q1",targetLines:30,training:true,
+      const validQ1=date>="2026-11-22"&&!holiday;
+      tasks.push(task("writing","writing",validQ1?"Q1 completa · aferição rumo aos 85/100":"Redação Q1 · treino",60,{writingType:"q1",targetLines:30,training:!validQ1,
         description:"Redação completa em treino; registrar na P4 se houver correção."}));
       tasks.push(task("case-outline","bridge","Esqueleto de caso Q2",30,{description:pair.case+" Diagnóstico, controle, execução e evidências."}));
       title=holiday?"Feriado de avanço + redação":"Domingo de estudo + redação";
