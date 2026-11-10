@@ -18,6 +18,303 @@
     {name:"Gestão digital + políticas públicas",a:["P3","Governança e Controle"],b:["P1","Serviços e Transformação Digital"],case:"Conectar confiabilidade de TI com controles, qualidade de serviço e geração de valor público."},
     {name:"Continuidade + governança e responsabilização",a:["P3","Continuidade e Recuperação"],b:["P2","Governança e Responsabilidades"],case:"Projetar resposta, continuidade, testes de recuperação, responsabilidades e prestação de contas."}
   ];
+  // Propostas autorais de treino, baseadas nos grupos existentes de P2/P3 do Edital.
+  // Não são previsões oficiais de temas do Cebraspe.
+  const WRITING_THEMES={
+    q1:[
+    {
+        "title": "Gestão de riscos e controles na administração pública",
+        "subject": "Fundamentos de Governança, Riscos e Integridade",
+        "context": "Um órgão público identificou decisões operacionais sem segregação de funções e controles documentados. A ausência de clareza sobre riscos pode comprometer resultados e prestação de contas.",
+        "proposal": "Discuta como gestão de riscos e controles proporcionais fortalecem a governança pública, a prevenção de irregularidades e a prestação de contas.",
+        "keywords": [
+            "risco",
+            "causa e consequência",
+            "controle preventivo",
+            "responsabilização"
+        ]
+    },
+    {
+        "title": "Transparência pública e proteção de dados pessoais",
+        "subject": "Fundamentos de Transparência, Ouvidoria e Participação",
+        "context": "A divulgação de informações públicas aumenta o controle social, mas alguns registros contêm dados pessoais que exigem salvaguardas e justificativa de tratamento.",
+        "proposal": "Analise como conciliar transparência ativa e passiva com a proteção de dados pessoais, indicando critérios e cuidados institucionais.",
+        "keywords": [
+            "publicidade",
+            "finalidade",
+            "necessidade",
+            "salvaguardas"
+        ]
+    },
+    {
+        "title": "Auditoria baseada em riscos e qualidade das evidências",
+        "subject": "Fundamentos de Auditoria Governamental",
+        "context": "Uma equipe de auditoria precisa selecionar processos para avaliação e comunicar achados úteis à gestão. Informações incompletas podem levar a conclusões inadequadas.",
+        "proposal": "Explique como o planejamento baseado em riscos e a qualidade das evidências contribuem para conclusões e recomendações de auditoria confiáveis.",
+        "keywords": [
+            "escopo",
+            "critérios",
+            "suficiência",
+            "monitoramento"
+        ]
+    },
+    {
+        "title": "Integridade pública e prevenção de conflitos de interesses",
+        "subject": "Fundamentos de Governança, Riscos e Integridade",
+        "context": "Relações entre agentes públicos e interesses privados podem criar situações que demandam identificação, prevenção e resposta institucional.",
+        "proposal": "Discuta o papel da cultura de integridade e dos mecanismos de prevenção de conflitos de interesses na proteção do interesse público.",
+        "keywords": [
+            "imparcialidade",
+            "ética",
+            "liderança",
+            "prevenção"
+        ]
+    },
+    {
+        "title": "Ouvidoria, participação social e melhoria de serviços",
+        "subject": "Fundamentos de Transparência, Ouvidoria e Participação",
+        "context": "Manifestações dos cidadãos podem indicar falhas recorrentes em serviços, mas precisam ser tratadas com acolhimento, encaminhamento adequado e resposta compreensível.",
+        "proposal": "Analise a contribuição da ouvidoria e do controle social para a melhoria dos serviços públicos e a confiança na administração.",
+        "keywords": [
+            "escuta",
+            "acessibilidade",
+            "encaminhamento",
+            "retorno ao usuário"
+        ]
+    },
+    {
+        "title": "Inteligência artificial responsável na gestão pública",
+        "subject": "Fundamentos de Evidências, Dados e Inteligência Artificial",
+        "context": "Sistemas de apoio à análise podem ampliar a capacidade de examinar informações, mas seus resultados dependem da qualidade dos dados, de supervisão e de controles.",
+        "proposal": "Discuta oportunidades e riscos do uso de inteligência artificial no setor público, indicando medidas para assegurar rastreabilidade e responsabilidade.",
+        "keywords": [
+            "qualidade dos dados",
+            "supervisão humana",
+            "viés",
+            "rastreabilidade"
+        ]
+    },
+    {
+        "title": "Indicadores e evidências para a tomada de decisão",
+        "subject": "Fundamentos de Evidências, Dados e Inteligência Artificial",
+        "context": "Um painel institucional apresentou melhora em um indicador, mas há dúvidas sobre o denominador utilizado e a comparabilidade dos dados.",
+        "proposal": "Explique a importância da qualidade dos indicadores e do exame de limitações e explicações alternativas na tomada de decisão pública.",
+        "keywords": [
+            "denominador",
+            "comparabilidade",
+            "inferência",
+            "evidência"
+        ]
+    },
+    {
+        "title": "Responsabilização e garantias do processo administrativo",
+        "subject": "Fundamentos de Direito Público Aplicado",
+        "context": "Diante de um possível problema na gestão, a administração deve distinguir indícios, irregularidades e responsabilidades, respeitando as garantias do processo.",
+        "proposal": "Analise como motivação, contraditório e proporcionalidade orientam apurações e decisões administrativas legítimas.",
+        "keywords": [
+            "motivação",
+            "contraditório",
+            "imparcialidade",
+            "proporcionalidade"
+        ]
+    },
+    {
+        "title": "Integração entre auditoria, ouvidoria e transparência",
+        "subject": "Fundamentos de Auditoria Governamental",
+        "context": "Informações de usuários e dados de transparência podem indicar riscos que mereçam avaliação, sem substituir a necessidade de verificação e evidências adequadas.",
+        "proposal": "Discuta como a atuação integrada das funções de controle da CGU pode prevenir falhas e contribuir para a melhoria da gestão.",
+        "keywords": [
+            "integração",
+            "risco",
+            "verificação",
+            "recomendação"
+        ]
+    },
+    {
+        "title": "Controles internos e segregação de funções",
+        "subject": "Fundamentos de Governança, Riscos e Integridade",
+        "context": "Em um processo institucional, uma única pessoa solicita, aprova e valida operações. Essa concentração pode ampliar vulnerabilidades e dificultar a detecção de desvios.",
+        "proposal": "Explique a importância da segregação de funções, da supervisão e da proporcionalidade dos controles internos para a governança.",
+        "keywords": [
+            "prevenção",
+            "detecção",
+            "segregação",
+            "monitoramento"
+        ]
+    },
+    {
+        "title": "Transparência, informação confiável e desinformação",
+        "subject": "Fundamentos de Transparência, Ouvidoria e Participação",
+        "context": "A divulgação de informações sem contexto pode gerar interpretações equivocadas, ainda que os dados sejam verdadeiros e tenham origem institucional.",
+        "proposal": "Analise a importância da integridade, do contexto e da comunicação clara das informações para a transparência e o controle social.",
+        "keywords": [
+            "fonte",
+            "contexto",
+            "verificação",
+            "comunicação"
+        ]
+    },
+    {
+        "title": "Planejamento e monitoramento da auditoria",
+        "subject": "Fundamentos de Auditoria Governamental",
+        "context": "Após identificar uma falha de controle, uma unidade precisa comunicar os resultados e acompanhar se as recomendações produzem melhorias efetivas.",
+        "proposal": "Discorra sobre as etapas de planejamento, execução, comunicação e monitoramento em um trabalho de auditoria governamental.",
+        "keywords": [
+            "planejamento",
+            "achado",
+            "recomendação",
+            "acompanhamento"
+        ]
+    }
+],
+    q2:[
+    {
+        "title": "Incidente em serviço público hospedado na nuvem",
+        "subject": "Nuvem e Cibersegurança",
+        "context": "Um sistema público hospedado em nuvem apresenta acessos incomuns e indisponibilidade parcial. O órgão e o provedor precisam delimitar responsabilidades e preservar registros.",
+        "proposal": "Como responsável técnico, descreva as medidas de detecção, contenção, recuperação, comunicação e aperfeiçoamento dos controles, considerando a responsabilidade compartilhada.",
+        "keywords": [
+            "logs",
+            "IAM",
+            "contenção",
+            "responsabilidade compartilhada"
+        ]
+    },
+    {
+        "title": "Indisponibilidade de aplicações em contêineres",
+        "subject": "Virtualização e Contêineres",
+        "context": "Uma atualização de aplicação em contêineres ocasiona erros recorrentes e aumento de latência. Há necessidade de preservar a continuidade do serviço.",
+        "proposal": "Apresente o diagnóstico técnico, a estratégia de reversão, a verificação da saúde dos serviços e as medidas para reduzir reincidência.",
+        "keywords": [
+            "orquestração",
+            "health checks",
+            "rollback",
+            "observabilidade"
+        ]
+    },
+    {
+        "title": "Ataque de ransomware e recuperação de serviço",
+        "subject": "Continuidade e Resposta a Incidentes",
+        "context": "Uma unidade identifica indícios de criptografia maliciosa em servidores que sustentam um serviço essencial. Não há certeza sobre a integridade das cópias de segurança.",
+        "proposal": "Indique as medidas de resposta ao incidente, preservação de evidências, validação dos backups e recuperação segura do serviço.",
+        "keywords": [
+            "isolamento",
+            "evidências",
+            "backup",
+            "RTO e RPO"
+        ]
+    },
+    {
+        "title": "Acesso privilegiado indevido em ambiente híbrido",
+        "subject": "Identidades e Proteção Criptográfica",
+        "context": "Foram detectadas alterações administrativas feitas por uma conta privilegiada fora do horário esperado, em recursos locais e de nuvem.",
+        "proposal": "Descreva como investigar os acessos, reduzir privilégios, reforçar autenticação, registrar evidências e prevenir novas ocorrências.",
+        "keywords": [
+            "IAM",
+            "MFA",
+            "menor privilégio",
+            "trilhas de auditoria"
+        ]
+    },
+    {
+        "title": "Queda de desempenho em rede corporativa",
+        "subject": "Redes e Comunicação",
+        "context": "Usuários de diferentes unidades relatam alta latência e perda intermitente de conectividade com aplicações internas e serviços na nuvem.",
+        "proposal": "Organize um plano de diagnóstico de rede, identificação de gargalos, correção e monitoramento contínuo, com justificativa das métricas selecionadas.",
+        "keywords": [
+            "latência",
+            "roteamento",
+            "DNS",
+            "QoS"
+        ]
+    },
+    {
+        "title": "Recuperação de banco de dados após falha",
+        "subject": "Plataformas de Bancos de Dados",
+        "context": "Uma falha interrompe a operação de uma base transacional crítica. Existem réplicas e registros de transações, mas é necessário conferir consistência.",
+        "proposal": "Explique como validar a integridade dos dados, utilizar logs e mecanismos de recuperação, restabelecer disponibilidade e prevenir perda de transações.",
+        "keywords": [
+            "replicação",
+            "transações",
+            "consistência",
+            "logs"
+        ]
+    },
+    {
+        "title": "Falhas em implantação com infraestrutura como código",
+        "subject": "Infraestrutura como Código",
+        "context": "Uma mudança automatizada alterou configurações de rede e permissões, gerando divergência entre ambientes de homologação e produção.",
+        "proposal": "Proponha controles de versionamento, revisão, testes, detecção de deriva de configuração e procedimento de reversão.",
+        "keywords": [
+            "versionamento",
+            "idempotência",
+            "pipeline",
+            "reversão"
+        ]
+    },
+    {
+        "title": "Gestão de vulnerabilidades em sistemas expostos",
+        "subject": "Vulnerabilidades e Operação de Segurança",
+        "context": "O inventário identificou serviços expostos com versões desatualizadas. Algumas correções podem afetar a continuidade das operações.",
+        "proposal": "Defina critérios de priorização, compensações temporárias, plano de correção, validação e acompanhamento dos riscos remanescentes.",
+        "keywords": [
+            "inventário",
+            "exposição",
+            "priorização",
+            "mitigação"
+        ]
+    },
+    {
+        "title": "Métricas e observabilidade em serviço digital",
+        "subject": "Confiabilidade e Observabilidade",
+        "context": "Um serviço apresenta alertas excessivos e indisponibilidades não detectadas em tempo. A equipe possui logs e métricas, mas não os relaciona a objetivos do serviço.",
+        "proposal": "Defina como melhorar monitoramento, indicadores, rastreamento, alarmes e resposta operacional, demonstrando como avaliar resultados.",
+        "keywords": [
+            "logs",
+            "métricas",
+            "SLO",
+            "rastreamento distribuído"
+        ]
+    },
+    {
+        "title": "Migração de aplicações legadas para nuvem",
+        "subject": "Migração e Modernização",
+        "context": "Um órgão pretende migrar aplicações com dependências entre serviços e exigências de disponibilidade e proteção de dados.",
+        "proposal": "Descreva análise de dependências, escolha da estratégia de migração, testes, controles de segurança, plano de transição e reversão.",
+        "keywords": [
+            "dependências",
+            "portabilidade",
+            "continuidade",
+            "rollback"
+        ]
+    },
+    {
+        "title": "Proteção de dados em armazenamento e backup",
+        "subject": "Privacidade e Proteção Operacional",
+        "context": "Foram encontrados dados pessoais em cópias de segurança, registros de aplicação e ambientes de testes, com permissões amplas.",
+        "proposal": "Apresente medidas de minimização, controle de acesso, proteção criptográfica, retenção e auditoria dos ambientes envolvidos.",
+        "keywords": [
+            "minimização",
+            "criptografia",
+            "retenção",
+            "controle de acesso"
+        ]
+    },
+    {
+        "title": "Continuidade de serviços digitais críticos",
+        "subject": "Continuidade e Recuperação",
+        "context": "Um serviço essencial depende de infraestrutura concentrada em um único ambiente e não possui exercícios recentes de recuperação.",
+        "proposal": "Proponha análise de impacto, metas de recuperação, arquitetura de redundância, testes de continuidade e indicadores de sucesso.",
+        "keywords": [
+            "BIA",
+            "RTO",
+            "RPO",
+            "redundância"
+        ]
+    }
+]
+  };
+
   // 34 versículos, um por dia, da Almeida 1911 (domínio público), grafia atualizada.
   // Textos curtos: quando não contém o versículo integral, o card indica "Trecho".
   const SPRINT_VERSES=[
