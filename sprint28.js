@@ -1,10 +1,10 @@
-/* CGU Cargo 3 — reta final de 28 dias (16/11 a 13/12/2026).
+/* CGU Cargo 3 — reta final de 34 dias (10/11 a 13/12/2026).
    Fonte: tópicos atômicos e métricas já salvas no aplicativo.
    Plano estratégico estimativo: frequência por tópico NÃO é publicada pelo Cebraspe.
-   Persistência na mesma dailyPlans/__sprint28V1, já sincronizada no Firestore.
+   Persistência na mesma dailyPlans/__sprint34V1, já sincronizada no Firestore.
 */
 (() => {
-  const META="__sprint28V1", START="2026-11-16", EXAM="2026-12-13", DURATION=28;
+  const META="__sprint34V1", START="2026-11-10", EXAM="2026-12-13", DURATION=34;
   const WEIGHT={P1:1,P2:1,P3:2}, LIMIT={P1:40,P2:40,P3:90};
   const PAIRS=[
     {name:"Segurança da infraestrutura + gestão de riscos",a:["P3","Riscos e Arquitetura de Segurança"],b:["P2","Riscos e Controles Essenciais"],case:"Aplicar defesa em profundidade, risco residual e controles proporcionais em serviço digital da CGU."},
@@ -94,72 +94,127 @@
     return tasks;
   }
   function generate(date,index,used,prior){
+    // Um dia já iniciado mantém os tópicos fixos e as conclusões registradas.
     if(prior?.locked&&Array.isArray(prior.tasks)){
-      prior.tasks.forEach(t=>{if(t.kind==="study"&&t.topicId){const x=byId(t.topicId);if(x)noteUsed(x,used,[]) }});
+      prior.tasks.forEach(t=>{
+        if(t.kind==="study"&&t.topicId){const x=byId(t.topicId);if(x)noteUsed(x,used,[])}
+      });
       return {...prior,date,index};
     }
-    const weekday=dateObj(date).getDay(),sat=weekday===6,sun=weekday===0,holiday=date==="2026-11-20",week=Math.floor(index/7);
+    const weekday=dateObj(date).getDay(),sat=weekday===6,sun=weekday===0,holiday=date==="2026-11-20";
     const cfg=cachedSettings||load().settings;
-    if(date===EXAM)return {date,index,type:"exam",title:"Dia da prova · CGU 2026",minutes:0,tasks:[],pair:null,locked:false,tip:"Prova objetiva pela manhã e discursiva à tarde. Preserve sono, documentos, deslocamento e alimentação. Nada de simulado pesado."};
-    const chosen=[],tasks=[];
-    let type="weekday",title="",tip="",minutes=80,pair=null;
+    if(date===EXAM)return {date,index,type:"exam",title:"Prova CGU · execução e tranquilidade",minutes:0,tasks:[],pair:null,locked:false,
+      tip:"Prova de 13/12/2026. Priorize documentos, alimentação, transporte, sono e administração do tempo. Não realize simulados neste dia."};
+    const chosen=[],tasks=[];let type="weekday",title="",tip="",minutes=200,pair=null;
+
+    // 11/12: último diagnóstico, definido pelo usuário. Não é um novo simulado integral.
+    if(date==="2026-12-11"){
+      type="diagnostic";title="Diagnóstico final · metade da objetiva + textos formativos";
+      tip="Exatamente 85 itens (P1 20, P2 20, P3 45) em 140 minutos, redação Q1 com 15 linhas em 20 minutos e estudo de caso Q2 com 30 linhas em 40 minutos. São treinos; não alteram a projeção de P4. Encerre às 20h.";
+      tasks.push(task("half-mock","halfMock","Meio simulado objetivo · 85 itens",140,{
+        timeLabel:"04:00–05:20 + 18:00–19:00",
+        fixed:true,description:"20 itens P1 + 20 P2 + 45 P3, respeitando pesos 1/1/2. Corrija e registre aqui os resultados separados por prova, não em um único tópico."}));
+      tasks.push(task("writing-q1","writing","Q1 formativa · exatamente 15 linhas",20,{
+        timeLabel:"19:00–19:20",fixed:true,writingType:"q1",targetLines:15,training:true,
+        description:"Texto curto de 15 linhas. Treinar comando, tese, dois argumentos e conclusão. Marcar como treino formativo no registro P4."}));
+      tasks.push(task("writing-q2","writing","Q2 formativa · exatamente 30 linhas",40,{
+        timeLabel:"19:20–20:00",fixed:true,writingType:"q2",targetLines:30,training:true,
+        description:"Estudo de caso com 30 linhas: situação, diagnóstico, ações técnicas, controles, verificação e conclusão. Não projetar nota de prova completa."}));
+      return {date,index,type,title,tip,pair:null,minutes,tasks,locked:false};
+    }
+
+    // 12/12: preservação de memória, sono e desempenho. Nada novo.
+    if(date==="2026-12-12"){
+      type="taper";minutes=60;title="Véspera · 60 minutos leves e descanso";
+      tip="No máximo 60 minutos, preferencialmente pela manhã. Sem questões cronometradas, sem redação e sem matéria nova. Confira comprovantes, documentos, local, trajeto e horário; preserve sono.";
+      tasks.push(task("light-review","review","Revisão de erros recorrentes e alertas Cebraspe",40,{
+        timeLabel:"Manhã · 40 min",description:"Releia apenas os pontos mais frágeis, fórmulas, erros de sinal e pegadinhas. Pare mesmo que ainda haja conteúdo."}));
+      tasks.push(task("light-p4","bridge","Estrutura mental da Q1 e Q2 + logística",20,{
+        timeLabel:"Manhã · 20 min",description:"Repassar 3 passos de cada resposta e organizar documentos e deslocamento. Nenhuma atividade à noite."}));
+      return {date,index,type,title,tip,pair:null,minutes,tasks,locked:false};
+    }
+
     if(!sat&&!sun&&!holiday){
-      const lane=["P3","P2","P3","P1","P3"][weekday-1]||"P3";
-      const main=choose(lane,date,used,chosen)||choose(null,date,used,chosen);
-      noteUsed(main,used,chosen);
+      const morningLane=["P3","P3","P2","P3","P3"][weekday-1]||"P3";
+      const eveningLane=["P3","P3","P3","P1","P2"][weekday-1]||"P3";
+      const morning=choose(morningLane,date,used,chosen)||choose("P3",date,used,chosen)||choose(null,date,used,chosen);
+      noteUsed(morning,used,chosen);
+      const evening=choose(eveningLane,date,used,chosen)||choose("P3",date,used,chosen)||choose(null,date,used,chosen);
+      noteUsed(evening,used,chosen);
       pair=pairFor(index,date,used);
-      title="04:00–05:20 · "+lane+" orientado por desempenho";
-      tip="Aula prioritária + questões com desconto Cebraspe + conexão curta com assunto complementar. Não marque questões como feitas sem registrá-las.";
-      if(main){
-        tasks.push(task("study","study","Estudo ativo do subitem",45,{topicId:main.id,description:"Teoria direcionada: conceito, diferenças e exemplos de cobrança certo/errado. Elabore 3 frases de recuperação sem consultar o material."}));
-        tasks.push(task("questions","questions","Rodada Cebraspe do mesmo subitem",25,{topicId:main.id,description:"Registre total, acertos e brancos; os erros e a nota ponderada serão calculados automaticamente."}));
+      title="Intensivão · 04:00–05:20 + 18:00–20:00";
+      tip="Manhã: revisão curta, aula de maior retorno e questões. Noite: segundo subitem, questões e aplicação/treino P4. A prioridade muda conforme o Edital e a última rodada. P3 predomina pelo peso 180/260 e aplicação em Q2.";
+      tasks.push(task("morning-review","review","Recuperação ativa do último estudo",10,{timeLabel:"04:00–04:10",
+        description:"Sem abrir aula: lembrar conceitos, revisar flashcards e um erro importante."}));
+      if(morning){
+        tasks.push(task("morning-study","study","Manhã · aula focal",45,{timeLabel:"04:10–04:55",topicId:morning.id,
+          description:"Compreensão do conceito, comparação, um exemplo de C/E e anotação de lacuna."}));
+        tasks.push(task("morning-questions","questions","Manhã · questões do mesmo subitem",25,{timeLabel:"04:55–05:20",topicId:morning.id,
+          description:"Registre total, acertos e brancos; nota líquida ponderada será recalculada. Se necessário, use parte da noite para completar a amostra mínima."}));
       }
-      if(lane==="P2")tasks.push(task("bridge","bridge","Ponte para Q1 (30 linhas)",10,{topicId:pair?.b||main?.id,description:"Em 10 minutos: tese, 2 argumentos, 1 exemplo institucional e conectivos. Depois evoluir para texto completo no fim de semana."}));
-      else tasks.push(task("bridge","bridge","Casadinha com outro conteúdo",10,{topicId:lane==="P3"?pair?.b:pair?.a,description:pair?.case||"Relacione o tema principal a um problema real de controle e gestão de TI."}));
+      if(evening){
+        tasks.push(task("evening-study","study","Noite · segundo subitem estratégico",50,{timeLabel:"18:00–18:50",topicId:evening.id,
+          description:"Preferência por lacuna de alto impacto; alternância de assuntos para cobertura ampla do edital."}));
+        tasks.push(task("evening-questions","questions","Noite · questões e análise dos erros",30,{timeLabel:"18:50–19:20",topicId:evening.id,
+          description:"Faça a rodada mínima e identifique o motivo dos erros. Lançar somente o que foi respondido."}));
+      }
+      const practice=weekday===2?"q1":weekday===4?"q2":null;
+      if(practice){
+        const targetLines=practice==="q1"?Math.min(30,15+5*Math.floor(index/7)):Math.min(60,30+10*Math.floor(index/7));
+        tasks.push(task("evening-practice","writing",
+          practice==="q1"?"Treino Q1 · Conhecimentos Complementares":"Treino Q2 · estudo de caso aplicado",40,
+          {timeLabel:"19:20–20:00",writingType:practice,targetLines,training:true,
+            description:practice==="q1"?"Argumentação, conectivos, objetivo público e conclusão. Treino curto não entra na projeção oficial de P4.":
+              (pair?.case||"Resolver um problema técnico")+". Estruture diagnóstico, medidas e validação; registrar como treino formativo."}));
+      }else{
+        tasks.push(task("evening-practice","bridge","Casadinha interdisciplinar P3 + P2/P1",40,{
+          timeLabel:"19:20–20:00",topicId:morning?.id,
+          description:(pair?.case||"Integração entre competências")+". Faça 2 comparações, uma hipótese de item C/E e um esqueleto de resposta técnica."}));
+      }
     }else if(sat){
-      type="saturday";minutes=index===26?120:clamp(n(cfg.satHours)||6,4,9)*60;
-      if(index===12)minutes=Math.max(minutes,330); // simulado objetivo oficial requer 300 min + correção
-      if(index===19)minutes=Math.max(minutes,240); // simulado P4 oficial requer 210 min
+      type="saturday";minutes=clamp(n(cfg.satHours)||6,4,9)*60;
       pair=pairFor(index,date,used);
       const a=byId(pair.a)||choose("P3",date,used,chosen),b=byId(pair.b)||choose("P2",date,used,chosen);
-      if(index===26){
-        title="Véspera da prova · revisão leve";
-        tip="Não estudar conteúdo novo em profundidade. Revisar erros recorrentes, fórmulas, estratégia Cebraspe e estrutura Q1/Q2; priorizar descanso.";
-        tasks.push(task("light","review","Revisão leve de erros críticos",75,{description:"Releia apenas os erros e flashcards mais relevantes. Sem rodada longa de questões."}));
-        tasks.push(task("outline","bridge","Roteiro mental de P4",45,{description:"Lembre a estrutura Q1 (30 linhas) e Q2 (60 linhas), comando e solução técnica. Encerre e descanse."}));
-      }else if(index===12){
+      if(date==="2026-11-28"){
+        minutes=Math.max(minutes,360);
         title="Simulado objetivo integral · 170 itens";
-        tip="Simulado completo no formato P1 40, P2 40 e P3 90, com 5 horas previstas no edital; depois classifique os erros. A nota fica no histórico de simulados, não em um tópico isolado.";
-        tasks.push(task("full-mock","fullMock","Simulado objetivo — P1 + P2 + P3",300,{fixed:true,description:"Aplicar 170 itens em 5 horas, respeitando +1/−1 em P1/P2 e +2/−2 em P3."}));
-        tasks.push(task("review","review","Correção e caderno de erros",60,{description:"Classificar erros por conteúdo, comando, distração ou falta de tempo. Priorização dos subitens frágeis."}));
-      }else if(index===19){
-        title="Simulado discursivo integral · P4";
-        tip="Simular 3h30 no total: Q1 até 30 linhas e Q2 até 60 linhas. Registrar cada nota e erros na aba Discursivas/P4.";
-        tasks.push(task("full-disc","fullDisc","Simulado P4 completo — Q1 + Q2",210,{fixed:true,description:"Q1: Conhecimentos complementares (30 pontos). Q2: situação-problema técnica (70 pontos). Corrija pela rubrica oficial."}));
+        tip="Simulado P1 40 + P2 40 + P3 90 (300 minutos), seguido de correção. Registre o resultado no próprio simulado. Não atribuir 170 questões a um tópico.";
+        tasks.push(task("full-mock","fullMock","Simulado integral P1 + P2 + P3",300,{
+          fixed:true,description:"5 horas sob condições reais, com descontos dos erros e controle do tempo."}));
+        tasks.push(task("review","review","Correção e classificação dos erros",60,{
+          description:"Identifique 3 gargalos reais e converta-os em prioridades para a semana seguinte."}));
+      }else if(date==="2026-12-05"){
+        minutes=Math.max(minutes,360);
+        title="Simulado P4 integral · 30 + 60 linhas";
+        tip="Simule Q1 completa (30 linhas) e Q2 completa (60 linhas), em até 3h30; só simulados não formativos devem compor a projeção competitiva da P4.";
+        tasks.push(task("full-disc","fullDisc","Discursivas P4 · Q1 + Q2 completos",210,{
+          fixed:true,description:"Escrever Q1 até 30 linhas (30 pontos) e Q2 até 60 linhas (70 pontos), corrigir conforme o edital e registrar ambas."}));
         const m=choose("P3",date,used,chosen);noteUsed(m,used,chosen);
-        if(m)tasks.push(task("study","study","Conteúdo P3 de maior retorno",90,{topicId:m.id,description:"Aplicação prática do conteúdo, focando resposta a situações-problema de TI."}));
-        tasks.push(task("review","review","Revisão de erros e tópicos P2",60,{description:"Corrigir falhas de argumentação e lacunas de conteúdo; não confundir treino com nota oficial."}));
+        if(m)tasks.push(task("study","study","Reforço P3 aplicado ao estudo de caso",90,{topicId:m.id,description:"Aplicação com diagnóstico e controles técnicos."}));
+        tasks.push(task("review","review","Analisar erros de conteúdo e estrutura das duas respostas",60,{description:"Identificar lacunas de comando, lógica e linguagem."}));
       }else{
-        title="Casuística P2 + P3 · simulado casadinha";
-        tip="Simulado combinado de conteúdos do edital, correção e estudo de temas novos. A casadinha não é uma prova oficial completa.";
-        tasks.push(task("pair","pairMock","Simulado misto · "+pair.name,120,{pair,description:pair.case}));
-        tasks.push(task("review","review","Correção criteriosa da casadinha",60,{description:"Identificar se cada erro foi técnico, de interpretação ou de leitura do comando."}));
-        if(a){tasks.push(task("study-a","study","Aula técnica P3 pendente",60,{topicId:a.id,description:"Consolidar o subitem de maior prioridade na área técnica."}));noteUsed(a,used,chosen)}
-        if(b){tasks.push(task("study-b","study","Complementares P2 para Q1",60,{topicId:b.id,description:"Conceitos e conexão com governança/CGU."}));noteUsed(b,used,chosen)}
-        tasks.push(task("writing","writing","Treino de situação-problema Q2",60,{writingType:"q2",description:pair.case+" Estruture diagnóstico, controles, encaminhamentos e critérios de validação."}));
+        title="Sábado de avanço + casadinha + Q2";
+        tip="Mais que revisão: simulado misto P2/P3, aulas novas e estudo de caso técnico. Divida o total em manhã, tarde e noite conforme sua disponibilidade.";
+        tasks.push(task("pair","pairMock","Simulado casadinha · "+pair.name,120,{pair,description:pair.case}));
+        tasks.push(task("review","review","Corrigir a casadinha e mapear falhas",45,{description:"Classificar erros por lacuna, leitura ou gestão do tempo."}));
+        if(a){tasks.push(task("study-a","study","Aula técnica P3 pendente",75,{topicId:a.id,description:"Avançar em teoria essencial e exemplo aplicável."}));noteUsed(a,used,chosen)}
+        if(b){tasks.push(task("study-b","study","Aula P2 e repertório Q1",60,{topicId:b.id,description:"Estruturar fundamentos institucionais e de controle."}));noteUsed(b,used,chosen)}
+        tasks.push(task("writing","writing","Situação-problema Q2 aplicada",60,{writingType:"q2",targetLines:50,training:true,
+          description:pair.case+" Entregar diagnóstico, ações, governança e validação."}));
       }
     }else{
       type=holiday?"holiday":"sunday";minutes=clamp(n(cfg.sunHours)||5,3,8)*60;
       pair=pairFor(index,date,used);
       const a=choose("P3",date,used,chosen,pair.a?byId(pair.a)?.g.nome:null)||choose("P3",date,used,chosen);
-      if(a){noteUsed(a,used,chosen);tasks.push(task("study-a","study","Aula nova ou recuperação P3",100,{topicId:a.id,description:"Aula direcionada + mapa de arquitetura, comandos e soluções aplicáveis."}))}
+      if(a){noteUsed(a,used,chosen);tasks.push(task("study-a","study","Aula P3 nova ou de recuperação",110,{topicId:a.id,description:"Teoria e esquema prático do assunto."}))}
       const b=choose("P2",date,used,chosen,pair.b?byId(pair.b)?.g.nome:null)||choose("P1",date,used,chosen);
-      if(b){noteUsed(b,used,chosen);tasks.push(task("study-b","study","Complementares e repertório Q1",80,{topicId:b.id,description:"Construir ponte entre governança, transparência, risco e responsabilidade."}))}
+      if(b){noteUsed(b,used,chosen);tasks.push(task("study-b","study","Aula P2 e preparação Q1",70,{topicId:b.id,description:"Integridade, transparência, governança ou auditoria conforme lacunas."}))}
       tasks.push(task("pair","pairMock","Casadinha P2/P3 · "+pair.name,60,{pair,description:pair.case}));
-      tasks.push(task("writing","writing","Redação Q1 — até 30 linhas",60,{writingType:"q1",description:"Texto com introdução, dois argumentos, aplicação ao órgão e conclusão. Registrar avaliação na P4."}));
-      tasks.push(task("case-outline","bridge","Esqueleto do estudo de caso Q2",30,{description:pair.case+" Faça 4 tópicos: diagnóstico, medidas, implementação e evidências para validar a solução."}));
-      title=holiday?"Feriado de avanço + redação":"Domingo de avanço + redação";
-      tip="Não é domingo só de revisão: inclui dois conteúdos, simulado transversal, Q1 e esqueleto de Q2; a duração de cada bloco se ajusta às horas escolhidas."
+      tasks.push(task("writing","writing","Redação Q1 · até 30 linhas",60,{writingType:"q1",targetLines:30,training:true,
+        description:"Redação completa em treino; registrar na P4 se houver correção."}));
+      tasks.push(task("case-outline","bridge","Esqueleto de caso Q2",30,{description:pair.case+" Diagnóstico, controle, execução e evidências."}));
+      title=holiday?"Feriado de avanço + redação":"Domingo de estudo + redação";
+      tip="Conteúdo novo P3 e P2, casadinha e produção textual. Não usar o dia só para revisar.";
     }
     fit(tasks,minutes);
     return {date,index,type,title,tip,pair,minutes,tasks,locked:false};
