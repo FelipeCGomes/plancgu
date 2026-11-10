@@ -74,6 +74,8 @@ test("App completo: abertura, navegação, rodadas, revisão, P4, 34 dias e reca
       assert.equal(typeof w[name],"function",name+" não instalado");
 
     nav(w,"sprint28");
+    assert.match(d.getElementById("page-sprint28").textContent,/Meta objetiva: 210\/260 · Meta P4: 85\/100/);
+    assert.equal(d.querySelectorAll("#s28GoalTracker .s28-goal-tile").length,4);
     assert.match(d.getElementById("s28Daily").textContent,/Dia/);
     w.CGU28_select("2026-12-11");
     const day=d.getElementById("s28Daily");
