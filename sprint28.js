@@ -544,18 +544,18 @@
     if(ready)return;ready=true;
     const nav=document.querySelector(".sidebar .nav");
     if(nav&&!nav.querySelector('[data-page="sprint28"]')){
-      const btn=document.createElement("button");btn.dataset.page="sprint28";btn.type="button";btn.textContent="🏁 Reta final · 28 dias";
+      const btn=document.createElement("button");btn.dataset.page="sprint28";btn.type="button";btn.textContent="🏁 Reta final · 34 dias";
       btn.onclick=function(){switchPage("sprint28",this)};
       const before=nav.querySelector('[data-page="revisar"]');nav.insertBefore(btn,before||null);
     }
     const main=document.querySelector(".main");
     if(!main||document.getElementById("page-sprint28"))return;
     const page=document.createElement("section");page.id="page-sprint28";page.className="page";
-    page.innerHTML='<div class="hero s28-header"><div><h2>Reta final · 28 dias</h2><p>16/11 a 13/12/2026 · Cargo 3 AFFC — Infraestrutura de TI</p></div><span class="badge p3">P3: 180/260 pts · Q2: 70/100 pts</span></div>'+
+    page.innerHTML='<div class="hero s28-header"><div><h2>Intensivão · 34 dias</h2><p>10/11 a 13/12/2026 · Cargo 3 AFFC — Infraestrutura de TI</p></div><span class="badge p3">P3: 180/260 pts · Q2: 70/100 pts</span></div>'+
       '<div id="s28KPIs" class="s28-kpis"></div><div class="s28-progress" aria-label="Progresso de tarefas"><i id="s28Progress" role="progressbar" aria-valuemin="0" aria-valuemax="100"></i></div>'+
-      '<div class="s28-card" style="margin-bottom:12px"><h3>Jornada realista e adaptável</h3><div class="s28-subline">Segunda a sexta: <b>04:00–05:20 (80 min)</b>, um subitem principal + questões + conexão. Sábados e domingos: conteúdos novos, simulados combinados, treino Q1/Q2 e correção. Véspera da prova: carga reduzida para descanso. Os simulados integrais preservam suas durações oficiais mínimas. Tarefas já iniciadas não são substituídas automaticamente; as futuras podem mudar conforme seu desempenho. Todos os temas vêm do Edital cadastrado.</div>'+
+      '<div class="s28-card" style="margin-bottom:12px"><h3>Jornada realista e adaptável</h3><div class="s28-subline">Segunda a sexta: <b>04:00–05:20</b> e <b>18:00–20:00</b> (3h20 por dia). Manhã com revisão ativa, aula e questões; noite com segundo subitem, questões e aplicação ou treino Q1/Q2. Sábados e domingos: conteúdos novos, simulados combinados, treino Q1/Q2 e correção. Véspera da prova: carga reduzida para descanso. Os simulados integrais preservam suas durações oficiais mínimas. Tarefas já iniciadas não são substituídas automaticamente; as futuras podem mudar conforme seu desempenho. Todos os temas vêm do Edital cadastrado.</div>'+
       '<div class="s28-config"><div><label>Horas por sábado (exceto véspera)</label><input id="s28Sat" type="number" min="4" max="9" step="1"></div><div><label>Horas por domingo</label><input id="s28Sun" type="number" min="3" max="8" step="1"></div><button class="s28-action" type="button" onclick="CGU28_saveHours()">Salvar horas</button></div>'+
-      '<div class="s28-subline">Nota: 28º dia é a prova. O volume é referência, não obrigação inflexível. A seleção estratégica não equivale a previsão oficial de temas.</div></div>'+
+      '<div class="s28-subline">Nota: 34º dia é a prova. O volume é referência, não obrigação inflexível. A seleção estratégica não equivale a previsão oficial de temas.</div></div>'+
       '<div class="s28-layout"><div class="s28-card"><h3>Calendário adaptativo</h3>'+
       '<div class="s28-toolbar"><button data-filter="todos" class="s28-chip on" onclick="CGU28_filter(\'todos\')">Todos</button><button data-filter="pendentes" class="s28-chip" onclick="CGU28_filter(\'pendentes\')">Pendentes</button><button data-filter="simulados" class="s28-chip" onclick="CGU28_filter(\'simulados\')">Simulados</button><button data-filter="discursivas" class="s28-chip" onclick="CGU28_filter(\'discursivas\')">P4</button></div>'+
       '<div id="s28Timeline" class="s28-day-list"></div></div><div class="s28-card"><h3>Execução do dia</h3><div id="s28Daily"></div></div></div>'+
@@ -563,19 +563,11 @@
       '<div id="s28CompInputs"></div><div id="s28CompOutput"></div>'+
       '<p class="s28-comp-notice">Fonte oficial: <a href="https://www.cebraspe.org.br/concursos/cgu_26_affc" target="_blank" rel="noopener noreferrer">Cebraspe · CGU 26 AFFC</a>. Percentuais de abstenção e preparo nesta calculadora são inteiramente configuráveis e ilustrativos.</p></div>'+
       '<div class="s28-card" style="margin-top:12px"><h3>Regras da seleção estratégica</h3><div class="s28-subline">1) Primeiro, subitens <b>não concluídos</b>, críticos e sem amostra. 2) <b>P3 recebe maior peso</b> pelo limite de 180/260 pontos e também alimenta o estudo de caso Q2 (70 pontos). 3) P2 integra teoria e redação Q1 (30 pontos). 4) Baixo líquido na <b>última rodada</b> eleva a necessidade de recuperação; 5) Casadinhas P2/P3 e P1/P3 geram simulados interdisciplinares. 6) Os temas mais prováveis são <b>hipóteses de prioridade</b>, nunca frequências oficiais divulgadas. Meta pessoal objetiva de 210–230/260 e treino P4 de 85+/100; nenhuma dessas metas garante a classificação.</div></div>';
-    // Semana preparatória: o ciclo começa exatamente 28 dias antes da prova,
-    // mas o usuário já pode estudar 80 minutos nas manhãs de 09 a 13/11.
     if(today()<START){
-      const x=choose("P3",today(),{},[])||choose(null,today(),{},[]);
-      const warmup=document.createElement("div");
-      warmup.className="s28-card";warmup.style.marginBottom="12px";
-      warmup.innerHTML='<h3>Comece agora · preparação de 09 a 15/11</h3>'+
-        '<div class="s28-subline">Antes de D1, use as manhãs de segunda a sexta <b>04:00–05:20</b>: 10 min de recuperação ativa, 45 min do subitem abaixo e 25 min de questões Cebraspe. No fim de semana, faça 1 treino Q1, 1 esqueleto Q2 e avance em conteúdo P3. Esta semana não substitui nem antecipa os 28 dias do calendário.</div>'+
-        (x?'<div class="s28-logic">Prioridade sugerida agora: <b>'+esc(fullTitle(x))+'</b> · '+esc(x.d.nome)+' · '+esc(x.priority)+'</div>':'');
-      const hero=page.querySelector(".hero");hero?.insertAdjacentElement("afterend",warmup);
+      const reminder=document.createElement("div");reminder.className="s28-logic";
+      reminder.textContent="O intensivão começa amanhã, 10/11, às 04:00. A manhã termina às 05:20 e o bloco noturno vai de 18:00 a 20:00.";
+      page.querySelector(".hero")?.insertAdjacentElement("afterend",reminder);
     }
-    const oldNav=nav?.querySelector('[data-page="hoje"]');
-    if(oldNav)oldNav.textContent="🎯 Plano tradicional · 3h";
     const review=document.getElementById("page-revisar");
     if(review)review.insertAdjacentElement("beforebegin",page);else main.appendChild(page);
     const original=window.switchPage;
@@ -583,7 +575,7 @@
       const wrapped=function(name,btn){
         const r=original.apply(this,arguments);
         if(name==="sprint28"){
-          const top=document.getElementById("topTitle");if(top)top.textContent="Reta final · 28 dias";
+          const top=document.getElementById("topTitle");if(top)top.textContent="Intensivão · 34 dias";
           render({keepScroll:false,keepComp:false});
         }
         return r;
@@ -593,6 +585,11 @@
     }
     if(today()>=START&&today()<=EXAM)selected=today();
     render({keepScroll:false,keepComp:false});
+    // O intensivão assume a navegação padrão do projeto na reta final.
+    if(today()<=EXAM){
+      const activeBtn=nav?.querySelector('[data-page="sprint28"]');
+      if(activeBtn)window.switchPage("sprint28",activeBtn);
+    }
     window.addEventListener("cgu-cloud-ready",()=>{if(document.getElementById("page-sprint28")?.classList.contains("active"))render({keepComp:false})});
     window.addEventListener("cgu-question-recorded",()=>{if(document.getElementById("page-sprint28")?.classList.contains("active"))requestAnimationFrame(()=>render())});
     window.addEventListener("cgu-p4-changed",()=>{if(document.getElementById("page-sprint28")?.classList.contains("active"))requestAnimationFrame(()=>render())});
