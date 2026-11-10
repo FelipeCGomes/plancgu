@@ -1061,12 +1061,17 @@
       if(trainingInput)trainingInput.checked=!!training;
       if(lines){lines.value="";lines.placeholder="Registre linhas realmente escritas (alvo: "+targetLines+")";}
       if(typeof window.CGU_p4TypeChanged==="function")window.CGU_p4TypeChanged();
+      const day=makeSchedule().find(x=>x.date===date);
+      const suggestion=day?writingTheme(day,type):null;
+      if(theme&&suggestion&&!theme.value.trim())theme.value=suggestion.title;
       const form=document.getElementById("p4Form");
       if(form){
         let banner=document.getElementById("s34WritingTarget");
         if(!banner){banner=document.createElement("div");banner.id="s34WritingTarget";banner.className="s28-writing-banner";form.prepend(banner);}
-        banner.textContent="Treino "+(type==="q1"?"Q1":"Q2")+" do dia "+date.split("-").reverse().join("/")+
-          " · objetivo "+targetLines+" linhas. Informe as linhas efetivamente escritas na correção; o formulário está marcado como formativo para não distorcer a projeção.";
+        banner.textContent=(training?"Treino formativo ":"Simulado completo ")+(type==="q1"?"Q1":"Q2")+" do dia "+date.split("-").reverse().join("/")+
+          " · tema sugerido: "+(suggestion?.title||"a definir")+
+          " · objetivo "+targetLines+" linhas. Registre apenas as linhas realmente escritas e a correção efetiva."+
+          (training?" A nota será excluída da projeção competitiva.":" A nota corrigida poderá compor a projeção válida da P4.");
       }
       theme?.focus({preventScroll:true});
     });
