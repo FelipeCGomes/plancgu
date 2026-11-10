@@ -306,8 +306,14 @@
     }else if(t.kind==="pairMock"||t.kind==="fullMock"||t.kind==="halfMock"){
       actions=done?resultsFor(day,t,b):mockFields(day,t)+'<div class="s28-actions"><button class="primary" type="button" onclick="CGU28_saveMock(\''+day.date+'\',\''+t.id+'\')">Salvar resultado do simulado</button></div>';
     }else if(t.kind==="writing"||t.kind==="fullDisc"){
-      actions='<span class="s28-subline">'+(done?'✓ Registro localizado no acompanhamento P4.':'O treino só conta automaticamente quando salvo na aba Discursivas / P4. Você também pode marcar um rascunho como feito, sem atribuir nota.')+'</span>'+
-      '<div class="s28-actions"><button type="button" class="primary" onclick="CGU28_openP4()">Abrir Discursivas / P4</button>'+
+      const p4Click=t.kind==="writing"
+        ?`CGU28_openP4('${t.writingType}','${day.date}',${t.targetLines||0},${t.training!==false})`
+        :"CGU28_openP4()";
+      const target=t.kind==="writing"&&t.targetLines
+        ?'<b class="s28-formative">Meta de escrita: '+t.targetLines+' linhas · '+(t.training?'treino formativo, fora da projeção P4':'produção de prova integral')+'</b>'
+        :'';
+      actions=target+'<span class="s28-subline">'+(done?'✓ Atividade já registrada ou rascunho marcado.':'A produção só recebe nota quando registrada na aba Discursivas/P4; rascunho não entra na projeção.')+'</span>'+
+      '<div class="s28-actions"><button type="button" class="primary" onclick="'+p4Click+'">Abrir formulário P4</button>'+
       '<button type="button" onclick="CGU28_toggle(\''+day.date+'\',\''+t.id+'\')">'+(b.days[day.date]?.checks?.[t.id]?"Desmarcar rascunho":"Marcar rascunho feito")+'</button></div>';
     }
     const last=x?.m?.q?' · última amostra: '+fmt(x.m.q)+' questões · '+fmt(x.m.liquido,1)+'% líquido · peso '+WEIGHT[exam]:'';
@@ -488,10 +494,36 @@
       ids.forEach(id=>window.dispatchEvent(new CustomEvent("cgu-question-recorded",{detail:{topicId:id,source:"reta-final-casadinha"}})));
     }
   };
-  window.CGU28_openP4=function(){
+  window.CGU28_openP4=function(type,date,targetLines,training=true){
     const b=document.querySelector('.nav button[data-page="discursiva"]');
-    if(b&&typeof switchPage==="function")switchPage("discursiva",b);
-    else if(typeof toast==="function")toast("Abra a aba Discursivas / P4 no menu.");
+    if(!b||typeof switchPage!=="function"){
+      if(typeof toast==="function")toast("Aba Discursivas/P4 não disponível.");
+      return;
+    }
+    switchPage("discursiva",b);
+    if(!type||!date)return;
+    requestAnimationFrame(()=>{
+      const theme=document.getElementById("p4-theme");
+      if(theme?.value?.trim()){
+        if(typeof toast==="function")toast("Já existe um rascunho aberto na P4; salve-o antes de iniciar o próximo treino.");
+        return;
+      }
+      const dateInput=document.getElementById("p4-date"),typeInput=document.getElementById("p4-type");
+      const trainingInput=document.getElementById("p4-training"),lines=document.getElementById("p4-lines");
+      if(dateInput)dateInput.value=date;
+      if(typeInput)typeInput.value=type;
+      if(trainingInput)trainingInput.checked=!!training;
+      if(lines){lines.value="";lines.placeholder="Registre linhas realmente escritas (alvo: "+targetLines+")";}
+      if(typeof window.CGU_p4TypeChanged==="function")window.CGU_p4TypeChanged();
+      const form=document.getElementById("p4Form");
+      if(form){
+        let banner=document.getElementById("s34WritingTarget");
+        if(!banner){banner=document.createElement("div");banner.id="s34WritingTarget";banner.className="s28-writing-banner";form.prepend(banner);}
+        banner.textContent="Treino "+(type==="q1"?"Q1":"Q2")+" do dia "+date.split("-").reverse().join("/")+
+          " · objetivo "+targetLines+" linhas. Informe as linhas efetivamente escritas na correção; o formulário está marcado como formativo para não distorcer a projeção.";
+      }
+      theme?.focus({preventScroll:true});
+    });
   };
   window.CGU28_saveHours=function(){
     const a=clamp(n(document.getElementById("s28Sat")?.value)||6,4,9),s=clamp(n(document.getElementById("s28Sun")?.value)||5,3,8);
