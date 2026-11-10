@@ -86,3 +86,14 @@
 #page-sprint28 .s28-task .s28-topic{font-size:11px}
 #page-sprint28 .s28-logic{font-size:10px}
 @media(max-width:650px){#page-sprint28 .s28-detail-head{flex-direction:column}#page-sprint28 .s28-fields{grid-template-columns:repeat(2,minmax(0,1fr))}#page-sprint28 .s28-fields.form-full{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
+/* Metas competitivas reais (não confundir com máximos de P3 ou Q2). */
+.s28-goalstrip{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:0 0 12px}
+.s28-goal-tile{border:1px solid #dbe4f0;background:#fff;border-radius:10px;padding:10px 11px;min-width:0;display:flex;flex-direction:column;gap:4px}
+.s28-goal-tile:first-child,.s28-goal-tile:nth-child(2){background:#eff6ff;border-color:#bfdbfe}
+.s28-goal-tile span{font-size:9px;color:#475569;font-weight:800;line-height:1.35}
+.s28-goal-tile b{font-size:17px;line-height:1.2;color:#17365d;overflow-wrap:anywhere}
+.s28-goal-tile small{font-size:9px;color:#64748b;line-height:1.45}
+.s28-goal-note{grid-column:1/-1;font-size:9px;line-height:1.55;color:#64748b;margin:0}
+@media(max-width:900px){.s28-goalstrip{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:500px){.s28-goalstrip{grid-template-columns:1fr 1fr;gap:6px}.s28-goal-tile{padding:8px}.s28-goal-tile b{font-size:14px}}
