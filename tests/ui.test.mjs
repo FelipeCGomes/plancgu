@@ -76,6 +76,17 @@ test("App completo: abertura, navegação, rodadas, revisão, P4, 34 dias e reca
     nav(w,"sprint28");
     assert.match(d.getElementById("page-sprint28").textContent,/Meta objetiva: 210\/260 · Meta P4: 85\/100/);
     assert.equal(d.querySelectorAll("#s28GoalTracker .s28-goal-tile").length,4);
+    const verseCard=d.getElementById("s28VerseCard");
+    assert.ok(verseCard, "Card de versículo do dia ausente");
+    const header=d.querySelector("#page-sprint28 > .hero");
+    assert.equal(header?.nextElementSibling?.id,"s28VerseCard","Card não está logo abaixo do título");
+    w.CGU28_select("2026-11-10");
+    assert.match(verseCard.textContent,/Josué 1:9/);
+    w.CGU28_select("2026-11-11");
+    assert.match(verseCard.textContent,/Provérbios 3:5/);
+    w.CGU28_select("2026-12-13");
+    assert.match(verseCard.textContent,/Salmos 121:8/);
+    assert.ok(verseCard.querySelector('a[href*="bibliaalmeida.com/salmos/121/"]'));
     assert.match(d.getElementById("s28Daily").textContent,/Dia/);
     w.CGU28_select("2026-12-11");
     const day=d.getElementById("s28Daily");
