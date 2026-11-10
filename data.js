@@ -66,7 +66,7 @@ const EDITAL=[...EDITAL_P1,...EDITAL_P2,...EDITAL_P3];
       await loadScript("discursive-type-fix.js?v=20261031-2","discursiveTypeFix");
       await loadScript("discursive-enhancements.js?v=20261031-1","discursiveEnhancements");
       await loadScript("discursive-style-cleanup.js?v=20261031-1","discursiveStyleCleanup");
-      await loadScript("discursive-structure-fix.js?v=20261031-2","discursiveStructureFix");
+      await loadScript("discursive-structure-fix.js?v=20261110-1","discursiveStructureFix");
       // Última camada do Plano: evita rerender global e remove textos redundantes.
       await loadScript("plan-focus-ui.js?v=20261104-1","planFocusUi");
       await loadScript("weighted-score-ui.js?v=20261108-3","weightedScoreUi");
