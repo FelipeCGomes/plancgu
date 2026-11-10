@@ -123,7 +123,7 @@
         return original.apply(this,arguments);
       }
       const titles={
-        dashboard:"Visão geral",hoje:"Plano de estudos",edital:"Edital por prioridade",
+        dashboard:"Visão geral",hoje:"Plano de estudos",sprint28:"Intensivão · 34 dias",edital:"Edital por prioridade",
         revisar:"Revisar",discursiva:"Discursivas / P4",cronograma:"Cronograma do edital"
       };
       const token=showSplash("Abrindo "+(titles[name]||"a página")+"...");
