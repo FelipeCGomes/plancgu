@@ -6,6 +6,8 @@
 (() => {
   const META="__sprint34V1", START="2026-11-10", EXAM="2026-12-13", DURATION=34;
   const WEIGHT={P1:1,P2:1,P3:2}, LIMIT={P1:40,P2:40,P3:90}, HALF_LIMIT={P1:20,P2:20,P3:45};
+  // Metas competitivas pessoais; os máximos oficiais não são alterados.
+  const FINAL_GOAL={objective:210,objectiveCenter:220,p4:85,blockPlan:{P1:30,P2:32,P3:148},blockMax:{P1:40,P2:40,P3:180}};
   const PAIRS=[
     {name:"Segurança da infraestrutura + gestão de riscos",a:["P3","Riscos e Arquitetura de Segurança"],b:["P2","Riscos e Controles Essenciais"],case:"Aplicar defesa em profundidade, risco residual e controles proporcionais em serviço digital da CGU."},
     {name:"Operação de segurança + transparência e privacidade",a:["P3","Vulnerabilidades e Operação de Segurança"],b:["P2","Transparência e Proteção de Dados"],case:"Tratar incidente, evidências, comunicação e proteção de dados sem interromper o serviço."},
@@ -17,7 +19,7 @@
     {name:"Continuidade + governança e responsabilização",a:["P3","Continuidade e Recuperação"],b:["P2","Governança e Responsabilidades"],case:"Projetar resposta, continuidade, testes de recuperação, responsabilidades e prestação de contas."}
   ];
   const PREF={satHours:6,sunHours:5};
-  let selected=START, dayFilter="todos", ready=false, cachedDeferrals=null, cachedSettings=null;
+  let selected=START, dayFilter="todos", ready=false, cachedDeferrals=null, cachedSettings=null, cachedGoal=null;
 
   function n(v){const r=Number(v);return Number.isFinite(r)?Math.max(0,r):0}
   function clamp(v,min,max){return Math.max(min,Math.min(max,v))}
@@ -50,10 +52,61 @@
     const d=cachedDeferrals||plans().__deferrals||{},t=d.topics?.[x.id],s=d.subjects?.[x.d.id];
     return !!((t?.until&&ymd<t.until&&!t.cancelledAtMs)||(s?.until&&ymd<s.until&&!s.cancelledAtMs));
   }
+  function goalSnapshot(bucket=load()){
+    // As metas por bloco (30+32+148=210) são uma distribuição tática, NÃO nota mínima oficial.
+    const rows=allRows();
+    const blocks={};
+    for(const exam of ["P1","P2","P3"]){
+      const part=rows.filter(r=>r.exam===exam);
+      const q=part.reduce((a,r)=>a+n(r.m?.q),0);
+      const a=part.reduce((sum,r)=>sum+n(r.m?.a),0);
+      const e=part.reduce((sum,r)=>sum+n(r.m?.e),0);
+      const max=FINAL_GOAL.blockMax[exam];
+      blocks[exam]={exam,max,goal:FINAL_GOAL.blockPlan[exam],q,
+        // Estimativa somente com amostra mínima; não equivale à nota prevista.
+        score:q>=10?(a-e)*max/q:null,source:"amostra"};
+    }
+    const full=Object.entries(bucket.mocks||{})
+      .flatMap(([date,obj])=>Object.values(obj||{}).filter(r=>r?.type==="integral"&&r?.parts?.P1&&r?.parts?.P2&&r?.parts?.P3).map(r=>({date,...r})))
+      .sort((a,b)=>b.date.localeCompare(a.date)||String(b.at||"").localeCompare(String(a.at||"")))[0];
+    if(full)for(const exam of ["P1","P2","P3"]){
+      blocks[exam].score=Number(full.parts[exam].net);
+      blocks[exam].source="simulado";
+    }
+    const objectiveReady=Object.values(blocks).every(p=>p.score!==null&&Number.isFinite(p.score));
+    const objective=objectiveReady?Object.values(blocks).reduce((sum,p)=>sum+p.score,0):null;
+
+    const entries=window.CGU_P4Store?.read?.()?.entries||
+      plans().__discursiveTrackerV1?.entries||[];
+    function p4Average(type){
+      const max=type==="q1"?30:70,limit=type==="q1"?30:60,factor=type==="q1"?6:14;
+      const valid=entries.filter(e=>e.type===type&&!e.training);
+      if(!valid.length)return null;
+      const scores=valid.map(e=>{
+        const lines=Math.min(limit,n(e.lines));
+        if(!lines||e.escapeTheme||e.noText)return 0;
+        const ne=n(e.spelling)+n(e.syntax)+n(e.vocab)+n(e.otherLang);
+        return Math.max(0,Math.min(max,n(e.nc))-factor*ne/lines);
+      });
+      return scores.reduce((sum,v)=>sum+v,0)/scores.length;
+    }
+    const q1=p4Average("q1"),q2=p4Average("q2");
+    const p4=q1===null||q2===null?null:q1+q2;
+    return {blocks,objective,objectiveSource:full?"simulado":"amostra",p4,q1,q2};
+  }
   function importance(x){
     if(!x)return 0;
     const m=x.m||{},gap=Math.max(0,n(m.meta)-Number(m.liquido||0)),p4=x.exam==="P3"?42:x.exam==="P2"?28:0;
     let score=priority(x)*35+({P3:120,P2:52,P1:36}[x.exam]||0)+p4;
+    // A lacuna para 210/260 eleva a urgência do bloco, respeitando P3 de peso 2.
+    const signal=cachedGoal?.blocks?.[x.exam];
+    if(signal?.score!==null&&signal?.score!==undefined){
+      const deficit=Math.max(0,signal.goal-signal.score);
+      score+=Math.min(65,deficit*2.2);
+    }
+    // Q1 vem de P2 e Q2 vem de P3: recuperar lacunas de P4 sem inventar peso.
+    if(x.exam==="P2"&&cachedGoal?.q1!=null)score+=Math.min(34,Math.max(0,25.5-cachedGoal.q1)*4);
+    if(x.exam==="P3"&&cachedGoal?.q2!=null)score+=Math.min(42,Math.max(0,59.5-cachedGoal.q2)*2);
     if(!m.s?.done)score+=95;
     if(!m.q)score+=50;
     else if(m.status==="Revisar")score+=75+Math.min(75,gap*1.5);
@@ -224,13 +277,14 @@
     const p=plans(),b=p[META]||{},used={},days=[];
     cachedDeferrals=p.__deferrals||{};
     cachedSettings={...PREF,...(b.settings||{})};
+    cachedGoal=goalSnapshot({mocks:b.mocks||{}});
     try{
       for(let i=0;i<DURATION;i++){
         const date=dateAt(i),p=generate(date,i,used,b.days?.[date]);
         days.push(p);
       }
       return days;
-    }finally{cachedDeferrals=null;cachedSettings=null}
+    }finally{cachedDeferrals=null;cachedSettings=null;cachedGoal=null}
   }
   function p4Entries(){return window.CGU_P4Store?.read?.()?.entries||[]}
   function written(date,type){
@@ -268,7 +322,7 @@
       const nfc=result.total/26+8.5;
       return '<div class="s28-result">Simulado registrado: <b>'+fmt(result.total)+' / 260 pts líquidos</b> (P1 '+fmt(result.parts.P1.net)+'; P2 '+fmt(result.parts.P2.net)+'; P3 '+fmt(result.parts.P3.net)+'). '+
         (pass?'✓ Acima dos mínimos objetivos eliminatórios.':'⚠ Abaixo de pelo menos um mínimo eliminatório por bloco ou total. ')+
-        'Meta pessoal: 210–230/260. NFC hipotética se P4 fosse 85/100: <b>'+fmt(nfc,2)+'/20</b> (não é classificação projetada).</div>';
+        'Piso pessoal: 210/260 · alvo central 220/260. NFC hipotética se P4 fosse 85/100: <b>'+fmt(nfc,2)+'/20</b> (não é classificação projetada).</div>';
     }
     return '<div class="s28-result">Casadinha registrada: '+result.parts.map(p=>esc(p.exam)+' '+fmt(p.net)+'/'+fmt(p.max)+' pts').join(" · ")+'</div>';
   }
@@ -349,7 +403,25 @@
     }).join("")||'<div class="s28-subline">Nenhum dia corresponde ao filtro.</div>';
     host.scrollTop=oldScroll;
   }
+  function renderGoalTracker(bucket){
+    const host=document.getElementById("s28GoalTracker");if(!host)return;
+    const g=goalSnapshot(bucket);
+    const objScore=g.objective===null?"Sem estimativa":fmt(g.objective,1)+" / 260";
+    const p4Score=g.p4===null?"Incompleta":fmt(g.p4,1)+" / 100";
+    const gapObj=g.objective===null?"Aguardando P1, P2 e P3 (mínimo 10 questões em cada prova).":
+      "Diferença para 210: "+fmt(Math.max(0,210-g.objective),1)+" pts · "+
+      (g.objectiveSource==="simulado"?"último simulado completo":"extrapolação das amostras; não é previsão");
+    const gapP4=g.p4===null?"Registre uma Q1 e uma Q2 válidas; treinos formativos são excluídos.":
+      "Diferença para 85: "+fmt(Math.max(0,85-g.p4),1)+" pts · médias das correções válidas";
+    host.innerHTML=
+      '<div class="s28-goal-tile"><span>Meta competitiva · objetiva</span><b>210/260</b><small>Alvo central 220 · P1 + P2 + P3</small></div>'+
+      '<div class="s28-goal-tile"><span>Meta competitiva · discursiva</span><b>85/100</b><small>P4 = Q1 de 30 + Q2 de 70 pontos</small></div>'+
+      '<div class="s28-goal-tile"><span>Diagnóstico objetivo</span><b>'+objScore+'</b><small>'+gapObj+'</small></div>'+
+      '<div class="s28-goal-tile"><span>Diagnóstico P4</span><b>'+p4Score+'</b><small>'+gapP4+'</small></div>'+
+      '<p class="s28-goal-note">Divisão tática ilustrativa para buscar 210 pontos: P1 <b>30/40</b>, P2 <b>32/40</b>, P3 <b>148/180</b>. P3 e Q2 conservam os máximos oficiais de 180 e 70; 210 e 85 são metas das provas completas. Os diagnósticos não representam nota oficial ou previsão de colocação.</p>';
+  }
   function renderKpis(days,b){
+    renderGoalTracker(b);
     const all=allRows(),critical=all.filter(x=>x.priority==="Crítica"&&!x.m.s.done).length;
     const below=all.filter(x=>x.m.status==="Revisar").length,unseen=all.filter(x=>!x.m.s.done).length;
     const p=progress(days,b),host=document.getElementById("s28KPIs");
@@ -568,8 +640,8 @@
     const main=document.querySelector(".main");
     if(!main||document.getElementById("page-sprint28"))return;
     const page=document.createElement("section");page.id="page-sprint28";page.className="page";
-    page.innerHTML='<div class="hero s28-header"><div><h2>Intensivão · 34 dias</h2><p>10/11 a 13/12/2026 · Cargo 3 AFFC — Infraestrutura de TI</p></div><span class="badge p3">P3: 180/260 pts · Q2: 70/100 pts</span></div>'+
-      '<div id="s28KPIs" class="s28-kpis"></div><div class="s28-progress" aria-label="Progresso de tarefas"><i id="s28Progress" role="progressbar" aria-valuemin="0" aria-valuemax="100"></i></div>'+
+    page.innerHTML='<div class="hero s28-header"><div><h2>Intensivão · 34 dias</h2><p>10/11 a 13/12/2026 · Cargo 3 AFFC — Infraestrutura de TI</p></div><span class="badge p3">🎯 Meta objetiva: 210/260 · Meta P4: 85/100</span></div>'+
+      '<div id="s28GoalTracker" class="s28-goalstrip"></div><div id="s28KPIs" class="s28-kpis"></div><div class="s28-progress" aria-label="Progresso de tarefas"><i id="s28Progress" role="progressbar" aria-valuemin="0" aria-valuemax="100"></i></div>'+
       '<div class="s28-card" style="margin-bottom:12px"><h3>Jornada realista e adaptável</h3><div class="s28-subline">Segunda a sexta: <b>04:00–05:20</b> e <b>18:00–20:00</b> (3h20 por dia). Manhã com revisão ativa, aula e questões; noite com segundo subitem, questões e aplicação ou treino Q1/Q2. Sábados e domingos: conteúdos novos, simulados combinados, treino Q1/Q2 e correção. Véspera da prova: carga reduzida para descanso. Os simulados integrais preservam suas durações oficiais mínimas. Tarefas já iniciadas não são substituídas automaticamente; as futuras podem mudar conforme seu desempenho. Todos os temas vêm do Edital cadastrado.</div>'+
       '<div class="s28-config"><div><label>Horas por sábado (exceto véspera)</label><input id="s28Sat" type="number" min="4" max="9" step="1"></div><div><label>Horas por domingo</label><input id="s28Sun" type="number" min="3" max="8" step="1"></div><button class="s28-action" type="button" onclick="CGU28_saveHours()">Salvar horas</button></div>'+
       '<div class="s28-subline">Nota: 34º dia é a prova. O volume é referência, não obrigação inflexível. A seleção estratégica não equivale a previsão oficial de temas.</div></div>'+
@@ -579,7 +651,7 @@
       '<div class="s28-card" style="margin-top:12px"><h3>Estimativa de concorrência · cenários, não previsão</h3><div class="s28-subline">Cargo 3: <b>6 vagas imediatas AC</b>, <b>25 aprovados AC no quadro de referência final</b> e <b>36 candidatos AC na referência para correção discursiva</b> (podendo haver situações específicas previstas no edital). Número de inscritos, abstenção e perfil de preparo não são conhecidos automaticamente. Sem dados observados, não existe cálculo confiável de concorrentes efetivos nem probabilidade de ficar entre os seis.</div>'+
       '<div id="s28CompInputs"></div><div id="s28CompOutput"></div>'+
       '<p class="s28-comp-notice">Fonte oficial: <a href="https://www.cebraspe.org.br/concursos/cgu_26_affc" target="_blank" rel="noopener noreferrer">Cebraspe · CGU 26 AFFC</a>. Percentuais de abstenção e preparo nesta calculadora são inteiramente configuráveis e ilustrativos.</p></div>'+
-      '<div class="s28-card" style="margin-top:12px"><h3>Regras da seleção estratégica</h3><div class="s28-subline">1) Primeiro, subitens <b>não concluídos</b>, críticos e sem amostra. 2) <b>P3 recebe maior peso</b> pelo limite de 180/260 pontos e também alimenta o estudo de caso Q2 (70 pontos). 3) P2 integra teoria e redação Q1 (30 pontos). 4) Baixo líquido na <b>última rodada</b> eleva a necessidade de recuperação; 5) Casadinhas P2/P3 e P1/P3 geram simulados interdisciplinares. 6) Os temas mais prováveis são <b>hipóteses de prioridade</b>, nunca frequências oficiais divulgadas. Meta pessoal objetiva de 210–230/260 e treino P4 de 85+/100; nenhuma dessas metas garante a classificação.</div></div>';
+      '<div class="s28-card" style="margin-top:12px"><h3>Regras da seleção estratégica</h3><div class="s28-subline">1) Primeiro, subitens <b>não concluídos</b>, críticos e sem amostra. 2) <b>P3 recebe maior peso</b> pelo limite de 180/260 pontos e também alimenta o estudo de caso Q2 (70 pontos). 3) P2 integra teoria e redação Q1 (30 pontos). 4) Baixo líquido na <b>última rodada</b> eleva a necessidade de recuperação; 5) Casadinhas P2/P3 e P1/P3 geram simulados interdisciplinares. 6) Os temas mais prováveis são <b>hipóteses de prioridade</b>, nunca frequências oficiais divulgadas. Piso estratégico de 210/260 na objetiva, centro 220/260 e meta discursiva P4 de 85/100. A divisão interna de referência é P1 30, P2 32 e P3 148 pontos; não é requisito do edital. Nenhuma dessas metas garante a classificação.</div></div>';
     if(today()<START){
       const reminder=document.createElement("div");reminder.className="s28-logic";
       reminder.textContent="O intensivão começa amanhã, 10/11, às 04:00. A manhã termina às 05:20 e o bloco noturno vai de 18:00 a 20:00.";
