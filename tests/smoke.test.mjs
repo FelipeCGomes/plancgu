@@ -64,7 +64,7 @@ function sprintHarness(){
     requestAnimationFrame:fn=>fn(),setTimeout,Date,console,Math
   };
   const source=file("sprint28.js").replace(/\s*setup\(\);\s*\}\)\(\);\s*$/,
-    "\n  window.__test34={makeSchedule,load,progress,mockFields,resultsFor,goalSnapshot,verses:SPRINT_VERSES,dateAt};\n})();");
+    "\n  window.__test34={makeSchedule,load,progress,mockFields,resultsFor,goalSnapshot,verses:SPRINT_VERSES,dateAt,writingTheme,activeRecallHtml,guideHtml};\n})();");
   assert.ok(source.includes("window.__test34="),"Não foi possível neutralizar a montagem da interface para os testes");
   vm.runInNewContext(source,context,{filename:"sprint28.js",timeout:3000});
   return {api:context.window,__test:context.window.__test34,rows,topicState,savedPlans,alerts,events,dom};
@@ -143,6 +143,39 @@ test("34 versículos únicos vinculados às datas do intensivão",()=>{
   }
 });
 
+test("Professor de revisão: usa o tópico do dia e não inventa erros",()=>{
+  const h=sprintHarness();
+  const d=h.__test.makeSchedule()[0];
+  const review=d.tasks.find(t=>t.id==="morning-review");
+  const html=h.__test.guideHtml(d,review,{days:{},mocks:{}});
+  assert.match(html,/O que revisar hoje/);
+  assert.match(html,/0–2 min/);
+  assert.match(html,/2–5 min/);
+  assert.match(html,/5–8 min/);
+  assert.match(html,/8–10 min/);
+  assert.match(html,/ainda sem conclusão registrada|Primeiro dia/i);
+  assert.match(html,/item C\/E/);
+  assert.doesNotMatch(html,/Última rodada disponível: \d+ erro/);
+});
+test("Propostas de Q1 e Q2 usam conteúdo do Edital e roteiro proporcional às linhas",()=>{
+  const h=sprintHarness(),days=h.__test.makeSchedule();
+  const q1Day=days.find(d=>d.tasks.some(t=>t.kind==="writing"&&t.writingType==="q1"));
+  const q2Day=days.find(d=>d.tasks.some(t=>t.kind==="writing"&&t.writingType==="q2"));
+  const q1Task=q1Day.tasks.find(t=>t.kind==="writing"&&t.writingType==="q1");
+  const q2Task=q2Day.tasks.find(t=>t.kind==="writing"&&t.writingType==="q2");
+  const q1Html=h.__test.guideHtml(q1Day,q1Task,{days:{},mocks:{}});
+  const q2Html=h.__test.guideHtml(q2Day,q2Task,{days:{},mocks:{}});
+  for(const v of ["Tema sugerido Q1","Texto motivador","Proposta de redação","Palavras-chave","Como começar"]){
+    assert.ok(q1Html.includes(v),v+" não aparece na Q1");
+  }
+  for(const v of ["Tema sugerido Q2","Situação-problema","Comando do estudo de caso","diagnóstico","Palavras-chave"]){
+    assert.ok(q2Html.includes(v),v+" não aparece na Q2");
+  }
+  assert.match(q1Html,new RegExp("Roteiro de "+q1Task.targetLines+" linhas"));
+  assert.match(q2Html,new RegExp("Roteiro de "+q2Task.targetLines+" linhas"));
+  assert.equal(h.__test.writingTheme(q1Day,"q1").subject.includes("Fundamentos"),true);
+  assert.equal(h.__test.writingTheme(q2Day,"q2").subject.length>10,true);
+});
 test("Questões lançadas no Intensivão preservam histórico e peso do tópico",()=>{
   const h=sprintHarness(),day=h.__test.makeSchedule()[0],t=day.tasks.find(x=>x.kind==="questions");
   assert.ok(t?.topicId);
