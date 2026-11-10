@@ -410,8 +410,24 @@
   function taskIn(b,date,id){return ensureDay(b,date).tasks.find(t=>t.id===id)}
   function feedbackStart(text){window.CGUFeedback?.begin?.(text||"Atualizando plano...")}
   function feedbackEnd(){window.CGUFeedback?.complete?.()}
-  function updateAfter(b,notice){
-    write(b);render();feedbackEnd();
+  function updateAfter(b,notice,taskId=null){
+    write(b);
+    const days=makeSchedule();
+    renderKpis(days,b);
+    renderDays(days,b);
+    const day=days.find(d=>d.date===selected);
+    if(day&&taskId){
+      // Atualiza só o card alterado: outros formulários preenchidos continuam intactos.
+      const oldCard=[...(document.querySelectorAll("#s28Daily [data-task]"))]
+        .find(el=>el.dataset.task===taskId);
+      const changed=day.tasks.find(t=>t.id===taskId);
+      if(oldCard&&changed){
+        oldCard.outerHTML=renderTask(day,changed,b);
+        const badge=document.querySelector("#s28Daily .s28-detail-head .badge");
+        if(badge)badge.textContent=day.tasks.filter(t=>completed(t,day,b)).length+"/"+day.tasks.length+" tarefas";
+      }else renderDay(days,b);
+    }else renderDay(days,b);
+    feedbackEnd();
     if(notice&&typeof toast==="function")toast(notice);
   }
   function saveTopicRound(id,q,a,b,source){
@@ -446,7 +462,7 @@
       else if(old.completionSource==="sprint34")setTS(t.topicId,{done:false,completedAtMs:null,completionSource:"sprint34-reopened",updatedAtMs:Date.now()});
       try{save()}catch(e){}
     }
-    updateAfter(b,next?"Atividade concluída.":"Atividade reaberta.");
+    updateAfter(b,next?"Atividade concluída.":"Atividade reaberta.",key);
   };
   window.CGU28_saveQuestions=function(date,key){
     const b=load(),t=taskIn(b,date,key);if(!t?.topicId)return;
@@ -457,7 +473,7 @@
     saveTopicRound(t.topicId,data.q,data.a,data.b,"reta-final-34");
     b.days[date].checks={...(b.days[date].checks||{}),[key]:true};
     try{save()}catch(e){}
-    updateAfter(b,"Rodada registrada no tópico e sincronizável com o Edital.");
+    updateAfter(b,"Rodada registrada no tópico e sincronizável com o Edital.",key);
     window.dispatchEvent(new CustomEvent("cgu-question-recorded",{detail:{topicId:t.topicId,source:"reta-final-34"}}));
   };
   window.CGU28_saveMock=function(date,key){
@@ -476,7 +492,7 @@
       }
       feedbackStart(t.kind==="halfMock"?"Salvando meio simulado...":"Salvando simulado integral...");
       b.mocks[date]={...(b.mocks[date]||{}),[key]:{type:t.kind==="halfMock"?"diagnostico-meio":"integral",parts,total:sum,max:t.kind==="halfMock"?130:260,at:new Date().toISOString()}};
-      updateAfter(b,(t.kind==="halfMock"?"Meio simulado ":"Simulado integral ")+"salvo: "+fmt(sum)+" / "+(t.kind==="halfMock"?130:260)+" pontos. Sem alterar notas dos tópicos.");
+      updateAfter(b,(t.kind==="halfMock"?"Meio simulado ":"Simulado integral ")+"salvo: "+fmt(sum)+" / "+(t.kind==="halfMock"?130:260)+" pontos. Sem alterar notas dos tópicos.",key);
     }else if(t.kind==="pairMock"){
       const ids=[t.pair?.a,t.pair?.b].filter(Boolean),input=[];
       for(let i=0;i<ids.length;i++){
@@ -490,7 +506,7 @@
       const parts=input.map(x=>saveTopicRound(x.id,x.q,x.a,x.b,"reta-final-casadinha"));
       b.mocks[date]={...(b.mocks[date]||{}),[key]:{type:"casadinha",parts,topicIds:ids,at:new Date().toISOString()}};
       try{save()}catch(e){}
-      updateAfter(b,"Casadinha salva: duas rodadas vinculadas aos respectivos subitens.");
+      updateAfter(b,"Casadinha salva: duas rodadas vinculadas aos respectivos subitens.",key);
       ids.forEach(id=>window.dispatchEvent(new CustomEvent("cgu-question-recorded",{detail:{topicId:id,source:"reta-final-casadinha"}})));
     }
   };
@@ -591,7 +607,7 @@
       if(activeBtn)window.switchPage("sprint28",activeBtn);
     }
     window.addEventListener("cgu-cloud-ready",()=>{if(document.getElementById("page-sprint28")?.classList.contains("active"))render({keepComp:false})});
-    window.addEventListener("cgu-question-recorded",()=>{if(document.getElementById("page-sprint28")?.classList.contains("active"))requestAnimationFrame(()=>render())});
+    window.addEventListener("cgu-question-recorded",ev=>{if(document.getElementById("page-sprint28")?.classList.contains("active")&&!String(ev.detail?.source||"").startsWith("reta-final-"))requestAnimationFrame(()=>render())});
     window.addEventListener("cgu-p4-changed",()=>{if(document.getElementById("page-sprint28")?.classList.contains("active"))requestAnimationFrame(()=>render())});
   }
   window.CGU28_render=render;
