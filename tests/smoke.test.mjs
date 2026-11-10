@@ -64,7 +64,7 @@ function sprintHarness(){
     requestAnimationFrame:fn=>fn(),setTimeout,Date,console,Math
   };
   const source=file("sprint28.js").replace(/\s*setup\(\);\s*\}\)\(\);\s*$/,
-    "\n  window.__test34={makeSchedule,load,progress,mockFields,resultsFor,goalSnapshot};\n})();");
+    "\n  window.__test34={makeSchedule,load,progress,mockFields,resultsFor,goalSnapshot,verses:SPRINT_VERSES,dateAt};\n})();");
   assert.ok(source.includes("window.__test34="),"Não foi possível neutralizar a montagem da interface para os testes");
   vm.runInNewContext(source,context,{filename:"sprint28.js",timeout:3000});
   return {api:context.window,__test:context.window.__test34,rows,topicState,savedPlans,alerts,events,dom};
@@ -122,6 +122,25 @@ test("Ciclo 34 dias: horários, feriado, meio simulado e descanso sem sobrecarga
   assert.equal(last.tasks.find(t=>t.kind==="halfMock").minutes,140);
   assert.equal(days.find(d=>d.date==="2026-12-12").minutes,60);
   assert.equal(days.at(-1).tasks.length,0);
+});
+
+test("34 versículos únicos vinculados às datas do intensivão",()=>{
+  const {__test}=sprintHarness();
+  const verses=Array.from(__test.verses);
+  assert.equal(verses.length,34);
+  assert.equal(new Set(verses.map(v=>v.book+" "+v.chapter+":"+v.verse)).size,34);
+  assert.equal(__test.dateAt(0),"2026-11-10");
+  assert.equal(__test.dateAt(33),"2026-12-13");
+  assert.equal(verses[0].book,"Josué");
+  assert.equal(verses[0].chapter,1);
+  assert.equal(verses[0].verse,9);
+  assert.equal(verses[33].book,"Salmos");
+  assert.equal(verses[33].chapter,121);
+  assert.equal(verses[33].verse,8);
+  for(const verse of verses){
+    assert.ok(verse.quote.length>=20, "Trecho muito curto: "+verse.book);
+    assert.ok(verse.slug&&verse.chapter>0&&verse.verse>0);
+  }
 });
 
 test("Questões lançadas no Intensivão preservam histórico e peso do tópico",()=>{
