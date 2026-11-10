@@ -599,6 +599,24 @@
       wrapped.__s28Wrapped=true;
       window.switchPage=wrapped;
     }
+    // Protege as produções reduzidas de 11/12 de entrar como simulado válido da P4.
+    const originalP4Save=window.CGU_p4Save;
+    if(typeof originalP4Save==="function"&&!originalP4Save.__s34TrainingProtected){
+      const protectedP4Save=function(){
+        const date=document.getElementById("p4-date")?.value;
+        const type=document.getElementById("p4-type")?.value;
+        const lines=Number(document.getElementById("p4-lines")?.value);
+        const shortDecemberTraining=date==="2026-12-11"&&
+          ((type==="q1"&&lines>0&&lines<=15)||(type==="q2"&&lines>0&&lines<=30));
+        if(shortDecemberTraining){
+          const training=document.getElementById("p4-training");
+          if(training)training.checked=true;
+        }
+        return originalP4Save.apply(this,arguments);
+      };
+      protectedP4Save.__s34TrainingProtected=true;
+      window.CGU_p4Save=protectedP4Save;
+    }
     if(today()>=START&&today()<=EXAM)selected=today();
     render({keepScroll:false,keepComp:false});
     // O intensivão assume a navegação padrão do projeto na reta final.
