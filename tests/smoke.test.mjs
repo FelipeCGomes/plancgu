@@ -112,6 +112,10 @@ test("Ciclo 34 dias: horários, feriado, meio simulado e descanso sem sobrecarga
   assert.equal(days.find(d=>d.date==="2026-11-20").type,"holiday");
   assert.equal(days.find(d=>d.date==="2026-11-28").tasks.find(t=>t.kind==="fullMock").minutes,300);
   assert.equal(days.find(d=>d.date==="2026-12-05").tasks.find(t=>t.kind==="fullDisc").minutes,210);
+  assert.equal(days.find(d=>d.date==="2026-11-21").tasks.find(t=>t.kind==="writing").targetLines,60);
+  assert.equal(days.find(d=>d.date==="2026-11-21").tasks.find(t=>t.kind==="writing").training,false);
+  assert.equal(days.find(d=>d.date==="2026-11-22").tasks.find(t=>t.kind==="writing").training,false);
+  assert.equal(days.find(d=>d.date==="2026-11-15").tasks.find(t=>t.kind==="writing").training,true);
   const last=days.find(d=>d.date==="2026-12-11");
   assert.equal(last.minutes,200);
   assert.deepEqual(Array.from(last.tasks.filter(t=>t.kind==="writing"),t=>t.targetLines),[15,30]);
