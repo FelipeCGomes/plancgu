@@ -594,6 +594,11 @@
         if(name==="sprint28"){
           const top=document.getElementById("topTitle");if(top)top.textContent="Intensivão · 34 dias";
           render({keepScroll:false,keepComp:false});
+        }else if(name==="dashboard"){
+          // O Dashboard possui cards e filas calculados no momento da renderização.
+          // Recalcular ao entrar mantém os resultados da última rodada do Intensivão
+          // sincronizados sem forçar renderAll nem refazer o restante das páginas.
+          if(typeof renderDashboard==="function")renderDashboard();
         }
         return r;
       };
