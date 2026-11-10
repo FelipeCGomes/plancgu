@@ -688,6 +688,107 @@
       const x=byId(id);return '<div class="s28-pair-part" data-s28-pair="'+i+'"><b>'+(x?esc(x.exam)+' · '+esc(x.g.nome):"Subitem indisponível")+'</b><small>'+esc(fullTitle(x))+'</small>'+roundFields(day.date+"-"+t.id+"-"+i,id,Math.max(20,qMin(id)))+'</div>';
     }).join("")+'</div>';
   }
+
+  function candidateRecallTopic(day,b){
+    const previous=makeSchedule().filter(d=>d.date<day.date).reverse();
+    // Primeiro: aula realmente marcada como concluída num dia anterior do calendário.
+    for(const p of previous){
+      for(const taskItem of [...p.tasks].reverse()){
+        if(taskItem.kind!=="study"||!taskItem.topicId)continue;
+        if(b.days[p.date]?.checks?.[taskItem.id]){
+          const x=byId(taskItem.topicId);
+          if(x)return {x,source:"Aula concluída no Intensivão em "+fmtDate(p.date)};
+        }
+      }
+    }
+    // Segundo: estudo do subitem confirmado no Edital até a data selecionada.
+    const studied=allRows().map(x=>({x,ms:Number(getTS(x.id)?.completedAtMs)||0}))
+      .filter(r=>r.ms>0&&r.ms<=dateObj(day.date).getTime()+12*3600*1000&&getTS(r.x.id)?.done)
+      .sort((a,b)=>b.ms-a.ms);
+    if(studied.length)return {x:studied[0].x,source:"Último estudo concluído no Edital"};
+    // Terceiro: questões efetivamente registradas, sem supor que uma aula foi concluída.
+    const withRounds=allRows().map(x=>{
+      const rs=getTS(x.id)?.questionRounds||[];
+      const eligible=rs.filter(r=>r.at&&r.at.slice(0,10)<day.date);
+      const last=eligible.length?eligible[eligible.length-1]:null;
+      return {x,last};
+    }).filter(r=>r.last).sort((a,b)=>String(b.last.at).localeCompare(String(a.last.at)));
+    if(withRounds.length)return {x:withRounds[0].x,source:"Última rodada de questões registrada"};
+    const planned=previous.flatMap(p=>p.tasks.filter(t=>t.kind==="study").map(t=>({date:p.date,x:byId(t.topicId)})))
+      .filter(x=>x.x).reverse();
+    if(planned.length)return {x:planned[0].x,source:"Sugestão: aula prevista anteriormente, ainda sem conclusão registrada"};
+    const morning=makeSchedule().find(d=>d.date===day.date)?.tasks.find(t=>t.id==="morning-study");
+    return {x:byId(morning?.topicId),source:"Primeiro dia: aquecimento com o tópico previsto para hoje"};
+  }
+  function focusFragments(x){
+    if(!x)return ["o conteúdo do edital","o exemplo estudado"];
+    const topic=String(x.t||metadata(x).title||x.g.nome)
+      .replace(/^\s*\d+(?:\.\d+){1,2}\s*/,"").trim();
+    const chunks=topic.split(/[;,.]/).map(p=>p.trim()).filter(p=>p.length>8);
+    const shorten=t=>t.length>92?t.slice(0,89).trim()+"…":t;
+    return [shorten(chunks[0]||x.g.nome),shorten(chunks[1]||chunks[0]||x.g.nome)];
+  }
+  function activeRecallHtml(day,b){
+    const {x,source}=candidateRecallTopic(day,b);
+    if(!x)return '<div class="s28-study-guide"><b>Como revisar em 10 minutos</b><p>2 min: lembre um conceito de ontem. 4 min: explique-o sem ler. 3 min: faça um item certo/errado. 1 min: confira o que esqueceu.</p><small>Ainda não há tópico cadastrado para orientar esta revisão.</small></div>';
+    const [concept,second]=focusFragments(x),m=x.m||{},round=m.lastRound||(getTS(x.id)?.questionRounds||[]).at(-1);
+    const err=Number(round?.erros??m.e)||0,obs=String(getTS(x.id)?.obs||"").trim();
+    const errorText=err>0
+      ?'Última rodada disponível: '+err+' erro(s). Reabra uma das questões erradas e explique por que a alternativa era falsa ou verdadeira. O sistema conhece a contagem, não o enunciado.'
+      :'Não há erro identificado na última rodada. Escolha a afirmação que gerou mais dúvida e explique como a banca poderia alterá-la.';
+    return '<div class="s28-study-guide" data-guide="recall">'+
+      '<div class="s28-guide-top"><b>🧠 O que revisar hoje</b><span>'+esc(source)+'</span></div>'+
+      '<div class="s28-guide-subject">'+esc(fullTitle(x))+' <small>'+esc(x.d.nome)+' · '+x.exam+'</small></div>'+
+      '<div class="s28-guide-plan"><div><strong>0–2 min</strong><span>Feche o material e tente definir: '+esc(concept)+'.</span></div>'+
+      '<div><strong>2–5 min</strong><span>Explique a relação entre '+esc(concept)+' e '+esc(second)+'. Se não lembrar, diga o que precisa verificar.</span></div>'+
+      '<div><strong>5–8 min</strong><span>Crie um item C/E sobre esse assunto, julgue-o e justifique em voz alta.</span></div>'+
+      '<div><strong>8–10 min</strong><span>Abra as anotações e confira as lacunas. '+esc(errorText)+'</span></div></div>'+
+      (obs?'<div class="s28-guide-weak"><b>Seu ponto fraco anotado:</b> '+esc(obs)+'</div>':'')+
+      '<details class="s28-guide-extra"><summary>Como saber se revisei bem?</summary><p>Sem consultar: consigo explicar o conceito em uma frase, dar um exemplo de aplicação e justificar pelo menos um item C/E? Se não, anote a lacuna e revise-a na próxima rodada.</p></details>'+
+      '</div>';
+  }
+  function writingTheme(day,type){
+    const bank=WRITING_THEMES[type]||WRITING_THEMES.q1;
+    return bank[(day.index+(type==="q2"?5:0))%bank.length];
+  }
+  function writingTaskGuide(day,t,type){
+    const info=writingTheme(day,type),target=n(t?.targetLines)||(type==="q1"?30:60);
+    const q1=type==="q1";
+    const intro=Math.max(2,Math.round(target*(q1?.2:.16)));
+    const conclusion=Math.max(2,Math.round(target*(q1?.2:.20)));
+    const development=target-intro-conclusion;
+    const segments=q1
+      ?'<b>Roteiro de '+target+' linhas:</b> '+intro+' de introdução; '+development+' de desenvolvimento (dois argumentos); '+conclusion+' de conclusão com consequência ou encaminhamento.'
+      :'<b>Roteiro de '+target+' linhas:</b> '+intro+' de apresentação do problema; '+Math.round(development*.45)+' de diagnóstico; '+(development-Math.round(development*.45))+' de medidas técnicas; '+conclusion+' de validação e conclusão.';
+    const guidance=q1
+      ?'<b>Como começar:</b> “No contexto da administração pública, '+esc(info.title.toLowerCase())+' exige atenção a '+esc(info.keywords[0])+' e '+esc(info.keywords[1])+'. Nesse sentido, ...”<br>Use “Inicialmente”, “Além disso” e “Portanto” para organizar os parágrafos.'
+      :'<b>Como começar:</b> “A situação apresentada exige identificar as causas da falha, seus impactos e os controles envolvidos. Inicialmente, devem ser ...”<br>Não pare no diagnóstico: indique quem executa, como validar e como acompanhar o resultado.';
+    const introLabel=q1?"Texto motivador":"Situação-problema";
+    const ask=q1?"Proposta de redação":"Comando do estudo de caso";
+    return '<div class="s28-study-guide s28-writing-guide" data-guide="'+type+'">'+
+      '<div class="s28-guide-top"><b>✍️ Tema sugerido '+type.toUpperCase()+'</b><span>Proposta de treino, não previsão oficial</span></div>'+
+      '<div class="s28-guide-subject">'+esc(info.title)+' <small>'+esc(info.subject)+'</small></div>'+
+      '<p><b>'+introLabel+':</b> '+esc(info.context)+'</p>'+
+      '<p><b>'+ask+':</b> '+esc(info.proposal)+'</p>'+
+      '<div class="s28-guide-keywords"><b>Palavras-chave:</b> '+info.keywords.map(v=>'<span>'+esc(v)+'</span>').join('')+'</div>'+
+      '<details class="s28-guide-extra" open><summary>Orientação do professor: como estruturar</summary><p>'+segments+'</p><p>'+guidance+'</p>'+
+      '<p class="s28-guide-tip">Antes de escrever, sublinhe o verbo do comando (discuta, analise, descreva ou proponha). Ao terminar, confirme se respondeu a todas as partes da proposta. Os pontos e linhas serão registrados na aba P4.</p></details>'+
+      '</div>';
+  }
+  function guideHtml(day,t,b){
+    if(t.id==="morning-review")return activeRecallHtml(day,b);
+    if(t.kind==="writing")return writingTaskGuide(day,t,t.writingType);
+    if(t.kind==="fullDisc"){
+      return '<div class="s28-guide-dual">'+
+        writingTaskGuide(day,{targetLines:30},"q1")+
+        writingTaskGuide(day,{targetLines:60},"q2")+'</div>';
+    }
+    if(t.id==="case-outline"||t.id==="light-p4"){
+      return writingTaskGuide(day,{targetLines:30},"q2");
+    }
+    return "";
+  }
+
   function renderTask(day,t,b){
     const done=completed(t,day,b),x=t.topicId?byId(t.topicId):null,exam=x?.exam||"";
     let actions="";
@@ -713,6 +814,7 @@
       '<header><strong>'+(done?'✓ ':'')+esc(t.title)+'</strong><small>'+(t.timeLabel?esc(t.timeLabel)+' · ':'')+t.minutes+' min'+last+'</small></header>'+
       (t.topicId?taskTitle(t):'')+'<p>'+esc(t.description||"")+'</p>'+
       (t.kind==="pairMock"?'<div class="s28-subline">Conexão para Q2: '+esc(t.pair?.case||"")+'</div>':'')+
+      guideHtml(day,t,b)+
       '<div class="s28-actions">'+actions+'</div></article>';
   }
   function renderDay(days,b){
