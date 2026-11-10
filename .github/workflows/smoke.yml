@@ -13,5 +13,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Testar carregamento, edital, intensivão, notas e persistência local
-        run: node --test tests/smoke.test.mjs
+      - name: Instalar DOM de testes (somente neste runner)
+        run: npm install --no-save --no-package-lock jsdom@26
+      - name: Testar carregamento, rotas, editais, histórico, intensivão, P4 e persistência
+        run: node --test tests/smoke.test.mjs tests/ui.test.mjs
