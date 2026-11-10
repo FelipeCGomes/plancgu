@@ -4,6 +4,8 @@
 */
 (() => {
   function fixSummaryClass(){
+    // Não observar um document já encerrado (reload/troca de janela).
+    if(typeof document==="undefined"||!document?.querySelector)return;
     const card=document.querySelector('#page-discursiva #p4Summary .p4-summary.main');
     if(card){
       card.classList.remove('main');
@@ -39,11 +41,10 @@
     window.switchPage=wrappedSwitch;
   }
 
-  const summary=document.getElementById('p4Summary');
-  if(summary){
-    const observer=new MutationObserver(fixSummaryClass);
-    observer.observe(summary,{childList:true});
-  }
+  // As atualizações de P4 e a sincronização já emitem eventos.
+  // Evita MutationObserver contínuo, inclusive após reload/fechamento.
+  window.addEventListener('cgu-cloud-ready',fixSummaryClass);
+  window.addEventListener('cgu-p4-changed',fixSummaryClass);
 
   fixSummaryClass();
   window.CGU_fixDiscursiveStructure=fixSummaryClass;
