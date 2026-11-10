@@ -714,7 +714,7 @@
     if(today()<START){
       const reminder=document.createElement("div");reminder.className="s28-logic";
       reminder.textContent="O intensivão começa amanhã, 10/11, às 04:00. A manhã termina às 05:20 e o bloco noturno vai de 18:00 a 20:00.";
-      page.querySelector(".hero")?.insertAdjacentElement("afterend",reminder);
+      (page.querySelector("#s28VerseCard")||page.querySelector(".hero"))?.insertAdjacentElement("afterend",reminder);
     }
     const review=document.getElementById("page-revisar");
     if(review)review.insertAdjacentElement("beforebegin",page);else main.appendChild(page);
