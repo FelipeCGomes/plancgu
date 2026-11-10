@@ -18,6 +18,44 @@
     {name:"Gestão digital + políticas públicas",a:["P3","Governança e Controle"],b:["P1","Serviços e Transformação Digital"],case:"Conectar confiabilidade de TI com controles, qualidade de serviço e geração de valor público."},
     {name:"Continuidade + governança e responsabilização",a:["P3","Continuidade e Recuperação"],b:["P2","Governança e Responsabilidades"],case:"Projetar resposta, continuidade, testes de recuperação, responsabilidades e prestação de contas."}
   ];
+  // 34 versículos, um por dia, da Almeida 1911 (domínio público), grafia atualizada.
+  // Textos curtos: quando não contém o versículo integral, o card indica "Trecho".
+  const SPRINT_VERSES=[
+    {"book":"Josué","chapter":1,"verse":9,"quote":"Esforça-te, e tem bom ânimo; não pasmes, nem te espantes.","slug":"josue"},
+    {"book":"Provérbios","chapter":3,"verse":5,"quote":"Confia no Senhor com todo o teu coração, e não te estribes no teu próprio entendimento.","slug":"proverbios"},
+    {"book":"Tiago","chapter":1,"verse":5,"quote":"Se algum de vós tem falta de sabedoria, peça-a a Deus.","slug":"tiago"},
+    {"book":"Salmos","chapter":90,"verse":12,"quote":"Ensina-nos a contar os nossos dias, de tal maneira que alcancemos corações sábios.","slug":"salmos"},
+    {"book":"Filipenses","chapter":4,"verse":13,"quote":"Posso todas as coisas naquele que me fortalece.","slug":"filipenses"},
+    {"book":"Salmos","chapter":37,"verse":5,"quote":"Entrega o teu caminho ao Senhor; confia nele, e ele o fará.","slug":"salmos"},
+    {"book":"Salmos","chapter":27,"verse":14,"quote":"Espera no Senhor, anima-te, e ele fortalecerá o teu coração; espera pois no Senhor.","slug":"salmos"},
+    {"book":"Isaías","chapter":40,"verse":31,"quote":"Os que esperam no Senhor renovarão as forças.","slug":"isaias"},
+    {"book":"Salmos","chapter":121,"verse":2,"quote":"O meu socorro vem do Senhor, que fez o céu e a terra.","slug":"salmos"},
+    {"book":"2 Timóteo","chapter":1,"verse":7,"quote":"Deus não nos deu o espírito de temor, mas de fortaleza, e de amor, e de moderação.","slug":"2-timoteo"},
+    {"book":"Provérbios","chapter":16,"verse":3,"quote":"Confia do Senhor as tuas obras, e teus pensamentos serão estabelecidos.","slug":"proverbios"},
+    {"book":"Salmos","chapter":46,"verse":1,"quote":"Deus é o nosso refúgio e fortaleza, socorro bem presente na angústia.","slug":"salmos"},
+    {"book":"Provérbios","chapter":3,"verse":13,"quote":"Bem-aventurado o homem que acha sabedoria, e o homem que produz inteligência.","slug":"proverbios"},
+    {"book":"Filipenses","chapter":4,"verse":6,"quote":"De nada estejais solícitos: antes as vossas petições sejam em tudo conhecidas diante de Deus pela oração.","slug":"filipenses"},
+    {"book":"Isaías","chapter":41,"verse":10,"quote":"Não temas, porque eu estou contigo; não te assombres, porque eu sou teu Deus.","slug":"isaias"},
+    {"book":"Hebreus","chapter":12,"verse":1,"quote":"Corramos com paciência a carreira que nos está proposta.","slug":"hebreus"},
+    {"book":"Salmos","chapter":37,"verse":7,"quote":"Descansa no Senhor, e espera nele.","slug":"salmos"},
+    {"book":"Colossenses","chapter":3,"verse":23,"quote":"Tudo quanto fizerdes, fazei-o do coração, como ao Senhor, e não aos homens.","slug":"colossenses"},
+    {"book":"Salmos","chapter":23,"verse":1,"quote":"O Senhor é o meu pastor, nada me faltará.","slug":"salmos"},
+    {"book":"Tiago","chapter":1,"verse":12,"quote":"Bem-aventurado o varão que sofre a tentação; porque, quando for provado, receberá a coroa da vida.","slug":"tiago"},
+    {"book":"Salmos","chapter":46,"verse":10,"quote":"Aquietai-vos, e sabei que eu sou Deus.","slug":"salmos"},
+    {"book":"Provérbios","chapter":16,"verse":9,"quote":"O coração do homem considera o seu caminho, mas o Senhor lhe dirige os passos.","slug":"proverbios"},
+    {"book":"Salmos","chapter":27,"verse":1,"quote":"O Senhor é a minha luz e a minha salvação; a quem temerei?","slug":"salmos"},
+    {"book":"Filipenses","chapter":4,"verse":7,"quote":"A paz de Deus, que excede todo o entendimento, guardará os vossos corações.","slug":"filipenses"},
+    {"book":"1 Coríntios","chapter":15,"verse":58,"quote":"Sede firmes e constantes, sempre abundantes na obra do Senhor.","slug":"1-corintios"},
+    {"book":"Romanos","chapter":8,"verse":28,"quote":"Todas as coisas contribuem juntamente para o bem daqueles que amam a Deus.","slug":"romanos"},
+    {"book":"Salmos","chapter":121,"verse":7,"quote":"O Senhor te guardará de todo o mal: guardará a tua alma.","slug":"salmos"},
+    {"book":"Mateus","chapter":6,"verse":34,"quote":"Não vos inquieteis pois pelo dia de amanhã, porque o dia de amanhã cuidará de si mesmo.","slug":"mateus"},
+    {"book":"Provérbios","chapter":3,"verse":6,"quote":"Reconhece-o em todos os teus caminhos, e ele endireitará as tuas veredas.","slug":"proverbios"},
+    {"book":"2 Timóteo","chapter":1,"verse":6,"quote":"Despertes o dom de Deus que existe em ti.","slug":"2-timoteo"},
+    {"book":"Salmos","chapter":90,"verse":17,"quote":"Confirma sobre nós a obra das nossas mãos.","slug":"salmos"},
+    {"book":"Filipenses","chapter":4,"verse":8,"quote":"Tudo o que é verdadeiro, tudo o que é honesto, tudo o que é justo, tudo o que é puro.","slug":"filipenses"},
+    {"book":"Salmos","chapter":23,"verse":4,"quote":"Não temeria mal algum, porque tu estás comigo.","slug":"salmos"},
+    {"book":"Salmos","chapter":121,"verse":8,"quote":"O Senhor guardará a tua entrada e a tua saída, desde agora e para sempre.","slug":"salmos"}
+  ];
   const PREF={satHours:6,sunHours:5};
   let selected=START, dayFilter="todos", ready=false, cachedDeferrals=null, cachedSettings=null, cachedGoal=null;
 
@@ -405,6 +443,24 @@
     }).join("")||'<div class="s28-subline">Nenhum dia corresponde ao filtro.</div>';
     host.scrollTop=oldScroll;
   }
+  function renderDailyVerse(){
+    const host=document.getElementById("s28VerseCard");
+    if(!host)return;
+    const chosenDay=selected>=START&&selected<=EXAM?selected:today();
+    const delta=Math.round((dateObj(chosenDay)-dateObj(START))/86400000);
+    const index=Math.max(0,Math.min(SPRINT_VERSES.length-1,delta));
+    const v=SPRINT_VERSES[index];
+    const reference=v.book+" "+v.chapter+":"+v.verse;
+    const chapterUrl="https://bibliaalmeida.com/"+v.slug+"/"+v.chapter+"/";
+    host.innerHTML='<div class="s28-verse-icon" aria-hidden="true">📖</div>'+
+      '<div class="s28-verse-body">'+
+        '<div class="s28-verse-header"><span>Palavra para o dia de estudo</span><span>Dia '+(index+1)+' de 34 · '+esc(fmtDate(dateAt(index)))+'</span></div>'+
+        '<blockquote>“'+esc(v.quote)+'”</blockquote>'+
+        '<div class="s28-verse-footer"><strong>'+esc(reference)+'</strong>'+
+        '<span>Almeida 1911 · trecho do versículo</span>'+
+        '<a href="'+chapterUrl+'" target="_blank" rel="noopener noreferrer" aria-label="Ler '+esc(reference)+' no capítulo completo">Ler capítulo completo</a></div>'+
+      '</div>';
+  }
   function renderGoalTracker(bucket){
     const host=document.getElementById("s28GoalTracker");if(!host)return;
     const g=goalSnapshot(bucket);
@@ -470,7 +526,7 @@
   function render({keepScroll=true,keepComp=true}={}){
     if(!document.getElementById("page-sprint28"))return;
     const scroll=window.scrollY,b=load(),days=makeSchedule();
-    renderKpis(days,b);renderDays(days,b);renderDay(days,b);
+    renderDailyVerse();renderKpis(days,b);renderDays(days,b);renderDay(days,b);
     const sh=document.getElementById("s28Sat"),su=document.getElementById("s28Sun");
     if(sh)sh.value=b.settings.satHours;if(su)su.value=b.settings.sunHours;
     if(!keepComp)renderCompetition(b);
@@ -643,6 +699,7 @@
     if(!main||document.getElementById("page-sprint28"))return;
     const page=document.createElement("section");page.id="page-sprint28";page.className="page";
     page.innerHTML='<div class="hero s28-header"><div><h2>Intensivão · 34 dias</h2><p>10/11 a 13/12/2026 · Cargo 3 AFFC — Infraestrutura de TI</p></div><span class="badge p3">🎯 Meta objetiva: 210/260 · Meta P4: 85/100</span></div>'+
+      '<div id="s28VerseCard" class="s28-verse-card" role="region" aria-label="Versículo bíblico do dia de estudo"></div>'+
       '<div id="s28GoalTracker" class="s28-goalstrip"></div><div id="s28KPIs" class="s28-kpis"></div><div class="s28-progress" aria-label="Progresso de tarefas"><i id="s28Progress" role="progressbar" aria-valuemin="0" aria-valuemax="100"></i></div>'+
       '<div class="s28-card" style="margin-bottom:12px"><h3>Jornada realista e adaptável</h3><div class="s28-subline">Segunda a sexta: <b>04:00–05:20</b> e <b>18:00–20:00</b> (3h20 por dia). Manhã com revisão ativa, aula e questões; noite com segundo subitem, questões e aplicação ou treino Q1/Q2. Sábados e domingos: conteúdos novos, simulados combinados, treino Q1/Q2 e correção. Véspera da prova: carga reduzida para descanso. Os simulados integrais preservam suas durações oficiais mínimas. Tarefas já iniciadas não são substituídas automaticamente; as futuras podem mudar conforme seu desempenho. Todos os temas vêm do Edital cadastrado.</div>'+
       '<div class="s28-config"><div><label>Horas por sábado (exceto véspera)</label><input id="s28Sat" type="number" min="4" max="9" step="1"></div><div><label>Horas por domingo</label><input id="s28Sun" type="number" min="3" max="8" step="1"></div><button class="s28-action" type="button" onclick="CGU28_saveHours()">Salvar horas</button></div>'+
