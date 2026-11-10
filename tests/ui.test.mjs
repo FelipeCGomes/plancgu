@@ -26,7 +26,7 @@ class LocalResources extends ResourceLoader {
 async function openApp(storage={}){
   const errors=[],vc=new VirtualConsole();
   vc.on("jsdomError",e=>{
-    if(!String(e.message).includes("Could not parse CSS stylesheet"))errors.push(String(e.message));
+    if(!String(e.message).includes("Could not parse CSS stylesheet"))errors.push("JSDOM: "+String(e.cause?.stack||e.detail?.stack||e.stack||e.message));
   });
   const dom=new JSDOM(source(),{
     url:"https://cgu.test/index.html",
@@ -42,7 +42,7 @@ async function openApp(storage={}){
       w.confirm=()=>true;
       w.requestIdleCallback=fn=>setTimeout(fn,0);
       w.matchMedia=()=>({matches:false,addListener:()=>{},removeListener:()=>{}});
-      w.addEventListener("error",e=>errors.push("window: "+e.message));
+      w.addEventListener("error",e=>errors.push("window: "+String(e.error?.stack||e.message)));
     }
   });
   await new Promise((done,fail)=>{
