@@ -170,12 +170,12 @@ test("Firestore recebe no snapshot o estado e o calendário da reta final",()=>{
   const plans={__sprint34V1:{version:2,days:{"2026-11-10":{locked:true}},mocks:{},updatedAtMs:123}};
   storage.set(k+"-daily-plans-v1",JSON.stringify(plans));
   const listeners={};
-  const win={addEventListener:(name,fn)=>(listeners[name]??=[]).push(fn),
+  const win={addEventListener:(name,fn)=>(listeners[name]??=[]).push(fn),dispatchEvent:()=>{},
     FirebaseCGU:{scheduleSync:s=>record.push(s)}};
   const ctx={window:win,localStorage:{getItem:ky=>storage.get(ky)||null,setItem:(ky,v)=>storage.set(ky,v)},
     KEY:k,state:{mock:{questoes:20,acertos:18,brancos:0,erros:2}},settings:{P3:80},
     lessonState:{},DEFAULT_META:{P1:70,P2:75,P3:80},save:()=>{},ensureKnownHistory:()=>{},
-    Date,console};
+    Date,console,CustomEvent:class{constructor(type,props){this.type=type;this.detail=props?.detail}}};
   vm.runInNewContext(file("cloud-sync.js"),ctx);
   assert.ok(listeners["cgu-plan-changed"]);
   listeners["cgu-plan-changed"][0]();
