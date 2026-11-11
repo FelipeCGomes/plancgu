@@ -999,11 +999,12 @@
         .find(el=>el.dataset.task===taskId);
       const changed=day.tasks.find(t=>t.id===taskId);
       if(oldCard&&changed){
+        // Captura o grupo ANTES da substituição: outerHTML desanexa o card antigo.
+        const parent=oldCard.closest(".s34-session");
         oldCard.outerHTML=renderTask(day,changed,b);
         const badge=document.querySelector("#s28Daily .s28-detail-head .badge");
         if(badge)badge.textContent=day.tasks.filter(t=>completed(t,day,b)).length+"/"+day.tasks.length+" tarefas";
         // O cabeçalho da manhã/noite também precisa refletir a conclusão, sem recarregar a tela.
-        const parent=oldCard.closest(".s34-session");
         if(parent){
           const key=parent.dataset.session,part=sessionTasks(day,key);
           const done=part.filter(t=>completed(t,day,b)).length;
