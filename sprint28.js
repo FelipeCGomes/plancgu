@@ -626,8 +626,7 @@
   // Um dia iniciado não pode trocar as aulas após F5 nem depois de lançar questões no Edital.
   // Fixar só o dia real após a carga inicial do Firebase evita sobrescrever um plano remoto
   // com a versão provisória do cache que é mostrada antes da autenticação.
-  function freezeTodayAfterCloud(){
-    const ymd=today();
+  function pinDateAfterHydration(ymd){
     if(ymd<START||ymd>=EXAM)return false;
     const b=load();
     if(b.days[ymd]?.locked&&Array.isArray(b.days[ymd].tasks))return false;
@@ -643,6 +642,9 @@
     };
     write(b);
     return true;
+  }
+  function freezeTodayAfterCloud(){
+    return pinDateAfterHydration(today());
   }
   function p4Entries(){return window.CGU_P4Store?.read?.()?.entries||[]}
   function written(date,type){
