@@ -232,7 +232,16 @@
   const style=document.createElement("style");style.id="plannerBalanceStyle";style.textContent=`.planner-week{margin-top:12px;border-top:1px solid #e2e8f0;padding-top:10px}.planner-preview-row{display:grid;grid-template-columns:105px 35px 1fr;gap:8px;padding:5px 0;border-bottom:1px solid #f1f5f9;font-size:9px}.planner-preview-row b{color:#17365D}.planner-preview-row span:last-child{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}`;document.head.appendChild(style);
 
   const plans=readPlans(),today=ymdToday();let changed=false;
-  Object.keys(plans).forEach(d=>{const p=plans[d];if(d>today&&Number(p?.plannerVersion)!==VERSION&&!(p?.completed||[]).length&&!p?.questionRegistered){delete plans[d];changed=true;}});
+  // Só limpar prévias FUTURAS identificadas por uma data YYYY-MM-DD.
+  // Chaves de metadados (__sprint34V1, __discursiveTrackerV1, __deferrals etc.)
+  // não são datas e NUNCA podem ser apagadas ao recarregar a página.
+  Object.keys(plans).forEach(d=>{
+    if(!/^\d{4}-\d{2}-\d{2}$/.test(d) || d<=today)return;
+    const p=plans[d];
+    if(Number(p?.plannerVersion)!==VERSION&&!(p?.completed||[]).length&&!p?.questionRegistered){
+      delete plans[d];changed=true;
+    }
+  });
   if(changed)writePlans(plans);
   try{renderToday();}catch(e){console.warn("Plano balanceado:",e);}
 })();
