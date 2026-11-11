@@ -1,0 +1,43 @@
+name: Deploy automatico - Firebase
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: firebase-production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Publicar Hosting e regras Firestore
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Obter codigo da branch main
+        uses: actions/checkout@v4
+
+      - name: Autenticar no Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_CGU_PLAN }}
+          project_id: cgu-plan
+
+      - name: Preparar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Validar configuracao do Firebase
+        run: |
+          test -s firebase.json
+          test -s .firebaserc
+          test -s firestore.rules
+
+      - name: Publicar Firebase Hosting e regras Firestore
+        run: npx --yes firebase-tools@latest deploy --only hosting,firestore:rules --project cgu-plan --non-interactive
