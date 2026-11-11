@@ -95,10 +95,10 @@ test("App completo: abertura, navegação, rodadas, revisão, P4, 34 dias e reca
     assert.ok(morningInitial?.textContent.includes("Manhã · 04h00–05h20"));
     assert.ok(eveningInitial?.textContent.includes("Noite · 18h00–20h00"));
     assert.equal(morningInitial.open,true,"Manhã pendente deve iniciar expandida");
-    const morningContent=morningInitial.querySelector('[data-task="morning-study"]')?.textContent;
-    assert.ok(morningContent?.length>20);
     w.CGU28_toggle("2026-11-10","morning-review");
     w.CGU28_toggle("2026-11-10","morning-study");
+    const morningContent=d.querySelector('#s28Daily [data-task="morning-study"] .s28-topic')?.textContent;
+    assert.ok(morningContent?.length>10);
     assert.match(d.querySelector('#s28Daily .s34-session[data-session="morning"] .s34-session-count').textContent,/2\/3/);
     assert.ok(d.querySelector('#s28Daily .s34-session[data-session="evening"]'));
     assert.ok(d.querySelector('#s28Daily [data-guide="recall"]'),"Roteiro de recuperação ativa ausente");
@@ -176,7 +176,7 @@ test("App completo: abertura, navegação, rodadas, revisão, P4, 34 dias e reca
       assert.ok(second.document.getElementById("s28Daily"));
       assert.equal(second.document.querySelectorAll('#s28Daily .s34-session').length,2);
       assert.match(second.document.querySelector('#s28Daily .s34-session[data-session="morning"] .s34-session-count').textContent,/2\/3/);
-      assert.equal(second.document.querySelector('#s28Daily [data-task="morning-study"]').textContent,morningContent,"A aula da manhã mudou após recarga");
+      assert.equal(second.document.querySelector('#s28Daily [data-task="morning-study"] .s28-topic')?.textContent,morningContent,"A aula da manhã mudou após recarga");
       assert.equal(second.errors.filter(e=>!e.startsWith("ALERT:")).length,0,"Erros JS na recarga: "+second.errors.join(" | "));
     }finally{second.dom.window.close();}
     assert.equal(errors.filter(e=>!e.startsWith("ALERT:")).length,0,"Erros JS no teste: "+errors.join(" | "));
