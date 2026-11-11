@@ -121,12 +121,15 @@
       window.FirebaseCGU.enableSync();
       if(typeof renderAll==="function")renderAll();
       if(typeof renderPerformancePanel==="function")renderPerformancePanel();
+      window.CGU_cloudHydrated=true;
       window.dispatchEvent(new CustomEvent("cgu-cloud-ready",{detail:{uid:user.uid}}));
     }catch(error){
       applyingCloud=false;console.error("Falha na sincronização inicial:",error);
       window.FirebaseCGU.enableSync();
       if(typeof ensureKnownHistory==="function")ensureKnownHistory();
       if(typeof renderAll==="function")renderAll();
+      window.CGU_cloudHydrated=true;
+      window.dispatchEvent(new CustomEvent("cgu-data-hydrated",{detail:{offline:true}}));
       if(typeof toast==="function")toast("Firebase indisponível: usando dados salvos neste navegador.");
     }
   }
