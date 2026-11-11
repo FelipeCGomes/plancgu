@@ -64,7 +64,7 @@ function sprintHarness(){
     requestAnimationFrame:fn=>fn(),setTimeout,Date,console,Math
   };
   const source=file("sprint28.js").replace(/\s*setup\(\);\s*\}\)\(\);\s*$/,
-    "\n  window.__test34={makeSchedule,load,progress,mockFields,resultsFor,goalSnapshot,verses:SPRINT_VERSES,dateAt,writingTheme,activeRecallHtml,guideHtml};\n})();");
+    "\n  window.__test34={makeSchedule,load,progress,mockFields,resultsFor,goalSnapshot,verses:SPRINT_VERSES,dateAt,writingTheme,activeRecallHtml,guideHtml,pinDateAfterHydration,renderSession};\n})();");
   assert.ok(source.includes("window.__test34="),"Não foi possível neutralizar a montagem da interface para os testes");
   vm.runInNewContext(source,context,{filename:"sprint28.js",timeout:3000});
   return {api:context.window,__test:context.window.__test34,rows,topicState,savedPlans,alerts,events,dom};
@@ -122,6 +122,47 @@ test("Ciclo 34 dias: horários, feriado, meio simulado e descanso sem sobrecarga
   assert.equal(last.tasks.find(t=>t.kind==="halfMock").minutes,140);
   assert.equal(days.find(d=>d.date==="2026-12-12").minutes,60);
   assert.equal(days.at(-1).tasks.length,0);
+});
+
+test("Bloco da manhã mantém as mesmas aulas após salvar, mudar desempenho e reabrir",()=>{
+  const h=sprintHarness(),day="2026-11-11";
+  const original=h.__test.makeSchedule().find(d=>d.date===day);
+  const first=original.tasks.find(t=>t.id==="morning-study");
+  const second=original.tasks.find(t=>t.id==="evening-study");
+  const review=original.tasks.find(t=>t.id==="morning-review");
+  assert.ok(first?.topicId&&second?.topicId&&review);
+  assert.equal(h.__test.pinDateAfterHydration(day),true);
+  const saved=h.savedPlans.value.__sprint34V1.days[day];
+  assert.equal(saved.locked,true);
+  assert.equal(saved.tasks.find(t=>t.id==="morning-study").topicId,first.topicId);
+  assert.equal(h.__test.pinDateAfterHydration(day),false,"O mesmo dia não pode gerar um segundo planejamento");
+  // Simula concluir a recuperação, a aula e a rodada da manhã.
+  h.api.CGU28_toggle(day,review.id);
+  h.api.CGU28_toggle(day,first.id);
+  h.dom.form=fields(20,18,0);
+  h.api.CGU28_saveQuestions(day,"morning-questions");
+  const refreshed=h.__test.makeSchedule().find(d=>d.date===day);
+  assert.equal(refreshed.tasks.length,original.tasks.length,"Não criar tarefas adicionais após F5");
+  assert.deepEqual(
+    Array.from(refreshed.tasks,t=>[t.id,t.topicId||""]),
+    Array.from(original.tasks,t=>[t.id,t.topicId||""]),
+    "O plano concluído não pode substituir tópicos após atualizar estado"
+  );
+  const b=h.__test.load();
+  const morningHtml=h.__test.renderSession(refreshed,b,"morning");
+  const eveningHtml=h.__test.renderSession(refreshed,b,"evening");
+  assert.match(morningHtml,/✓ Concluído/);
+  assert.ok(!morningHtml.includes(' open>'),"Manhã finalizada deve estar recolhida após recarga");
+  assert.match(eveningHtml,/Noite · 18h00–20h00/);
+  assert.ok(eveningHtml.includes("Estas são atividades previstas para a noite"));
+  assert.equal(refreshed.tasks.find(t=>t.id==="evening-study").topicId,second.topicId);
+  assert.equal(b.days[day].checks["morning-questions"],true,"A rodada não pode desaparecer");
+});
+test("Uma abertura fora do ciclo não cria novo planejamento",()=>{
+  const h=sprintHarness();
+  assert.equal(h.__test.pinDateAfterHydration("2026-12-13"),false,"Dia da prova não deve ser tratado como estudo");
+  assert.equal(h.__test.pinDateAfterHydration("2026-11-09"),false,"Dias fora do ciclo não devem ser gravados");
+  assert.equal(Object.keys(h.savedPlans.value).length,0);
 });
 
 test("34 versículos únicos vinculados às datas do intensivão",()=>{
