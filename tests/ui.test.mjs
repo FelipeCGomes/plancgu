@@ -161,6 +161,11 @@ test("App completo: abertura, navegação, rodadas, revisão, P4, 34 dias e reca
     assert.ok(w.CGU_P4Store.read().entries.some(e=>e.theme==="Regressão fictícia da aplicação"));
 
     const previousState=savedStorage(w);
+    const planKey=Object.keys(previousState).find(k=>k.endsWith("-daily-plans-v1"));
+    assert.ok(planKey,"Chave de dailyPlans ausente no cache local");
+    const planBefore=JSON.parse(previousState[planKey]);
+    assert.equal(planBefore.__sprint34V1?.days?.["2026-11-10"]?.checks?.["morning-review"],true,"Revisão da manhã não foi salva antes do F5");
+    assert.equal(planBefore.__sprint34V1?.days?.["2026-11-10"]?.checks?.["morning-study"],true,"Aula da manhã não foi salva antes do F5");
     assert.ok(Object.keys(previousState).some(k=>k.includes("discursive")));
     first.dom.window.close();
     first=null;
@@ -171,6 +176,11 @@ test("App completo: abertura, navegação, rodadas, revisão, P4, 34 dias e reca
       assert.ok(second.window.CGU_P4Store.read().entries.some(e=>e.theme==="Regressão fictícia da aplicação"),"P4 desapareceu após recarga");
       const roundAfter=second.window.getTS(topicId).questionRounds||[];
       assert.equal(roundAfter.length,before+1,"Rodada desapareceu após recarga");
+      const planAfter=second.window.CGU_readDailyPlans();
+      assert.equal(planAfter.__sprint34V1?.days?.["2026-11-10"]?.checks?.["morning-review"],true,
+        "A revisão da manhã desapareceu da base após reload. Keys="+Object.keys(planAfter).join(","));
+      assert.equal(planAfter.__sprint34V1?.days?.["2026-11-10"]?.checks?.["morning-study"],true,
+        "A aula da manhã desapareceu da base após reload");
       nav(second.window,"sprint28");
       second.window.CGU28_select("2026-11-10");
       assert.ok(second.document.getElementById("s28Daily"));
