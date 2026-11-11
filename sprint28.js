@@ -1222,10 +1222,14 @@
       const activeBtn=nav?.querySelector('[data-page="sprint28"]');
       if(activeBtn)window.switchPage("sprint28",activeBtn);
     }
-    window.addEventListener("cgu-cloud-ready",()=>{
+    const afterDataHydration=()=>{
       freezeTodayAfterCloud();
       if(document.getElementById("page-sprint28")?.classList.contains("active"))render({keepComp:false});
-    });
+    };
+    window.addEventListener("cgu-cloud-ready",afterDataHydration);
+    window.addEventListener("cgu-data-hydrated",afterDataHydration);
+    // A nuvem pode terminar antes da carga sequencial dos módulos do Intensivão.
+    if(window.CGU_cloudHydrated)afterDataHydration();
     window.addEventListener("cgu-question-recorded",ev=>{if(document.getElementById("page-sprint28")?.classList.contains("active")&&!String(ev.detail?.source||"").startsWith("reta-final-"))requestAnimationFrame(()=>render())});
     window.addEventListener("cgu-p4-changed",()=>{if(document.getElementById("page-sprint28")?.classList.contains("active"))requestAnimationFrame(()=>render())});
   }
