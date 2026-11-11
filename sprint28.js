@@ -623,6 +623,27 @@
       return days;
     }finally{cachedDeferrals=null;cachedSettings=null;cachedGoal=null}
   }
+  // Um dia iniciado não pode trocar as aulas após F5 nem depois de lançar questões no Edital.
+  // Fixar só o dia real após a carga inicial do Firebase evita sobrescrever um plano remoto
+  // com a versão provisória do cache que é mostrada antes da autenticação.
+  function freezeTodayAfterCloud(){
+    const ymd=today();
+    if(ymd<START||ymd>=EXAM)return false;
+    const b=load();
+    if(b.days[ymd]?.locked&&Array.isArray(b.days[ymd].tasks))return false;
+    const scheduled=makeSchedule().find(d=>d.date===ymd);
+    if(!scheduled)return false;
+    const previous=b.days[ymd]||{};
+    b.days[ymd]={
+      ...scheduled,
+      locked:true,
+      checks:{...(previous.checks||{})},
+      openedAtMs:Number(previous.openedAtMs)||Date.now(),
+      updatedAtMs:Date.now()
+    };
+    write(b);
+    return true;
+  }
   function p4Entries(){return window.CGU_P4Store?.read?.()?.entries||[]}
   function written(date,type){
     const entries=p4Entries();
@@ -817,13 +838,37 @@
       guideHtml(day,t,b)+
       '<div class="s28-actions">'+actions+'</div></article>';
   }
+  function sessionTasks(day,key){
+    if(day.type!=="weekday")return [];
+    return day.tasks.filter(t=>{
+      const time=String(t.timeLabel||"");
+      return key==="morning"?time.startsWith("04:"):time.startsWith("18:")||time.startsWith("19:");
+    });
+  }
+  function renderSession(day,b,key){
+    const tasks=sessionTasks(day,key);
+    if(!tasks.length)return "";
+    const done=tasks.filter(t=>completed(t,day,b)).length,allDone=done===tasks.length;
+    const morning=key==="morning";
+    const title=morning?"Manhã · 04h00–05h20":"Noite · 18h00–20h00";
+    const status=allDone?"✓ Concluído":done?done+"/"+tasks.length+" concluídas":"A realizar";
+    return '<details class="s34-session '+(allDone?"done":"")+'" data-session="'+key+'" '+(allDone?"":"open")+'>'+
+      '<summary><span class="s34-session-title">'+title+'</span>'+
+      '<span class="s34-session-count">'+status+'</span>'+
+      '<small>'+(allDone?"Bloco finalizado; clique para consultar as atividades.":morning?"O que falta no bloco da manhã":"Estas são atividades previstas para a noite, não novas tarefas da manhã.")+'</small></summary>'+
+      '<div class="s34-session-body">'+tasks.map(t=>renderTask(day,t,b)).join("")+'</div>'+
+      '</details>';
+  }
   function renderDay(days,b){
     const day=days.find(d=>d.date===selected)||days[0],host=document.getElementById("s28Daily");if(!host)return;
     if(!day)return;
     const done=day.tasks.filter(t=>completed(t,day,b)).length;
+    const display=day.type==="weekday"
+      ?renderSession(day,b,"morning")+renderSession(day,b,"evening")
+      :(day.tasks.length?day.tasks.map(t=>renderTask(day,t,b)).join(""):'<div class="s28-result">Dia da prova: revise apenas o indispensável e priorize sua execução. Boa prova.</div>');
     host.innerHTML='<div class="s28-detail-head"><div><strong>Dia '+(day.index+1)+' · '+esc(fmtDate(day.date))+'</strong><small>'+esc(day.title)+' · '+(day.minutes?clockHours(day.minutes)+" programadas":"dia de prova")+'</small></div><span class="badge '+(done===day.tasks.length?"p3":"high")+'">'+done+'/'+day.tasks.length+' tarefas</span></div>'+
       '<div class="s28-logic">'+esc(day.tip)+'</div>'+
-      (day.tasks.length?day.tasks.map(t=>renderTask(day,t,b)).join(""):'<div class="s28-result">Dia da prova: revise apenas o indispensável e priorize sua execução. Boa prova.</div>');
+      display;
   }
   function renderDays(days,b){
     const host=document.getElementById("s28Timeline");if(!host)return;
@@ -955,6 +1000,18 @@
         oldCard.outerHTML=renderTask(day,changed,b);
         const badge=document.querySelector("#s28Daily .s28-detail-head .badge");
         if(badge)badge.textContent=day.tasks.filter(t=>completed(t,day,b)).length+"/"+day.tasks.length+" tarefas";
+        // O cabeçalho da manhã/noite também precisa refletir a conclusão, sem recarregar a tela.
+        const parent=oldCard.closest(".s34-session");
+        if(parent){
+          const key=parent.dataset.session,part=sessionTasks(day,key);
+          const done=part.filter(t=>completed(t,day,b)).length;
+          const finished=done===part.length;
+          parent.classList.toggle("done",finished);
+          const count=parent.querySelector(".s34-session-count");
+          if(count)count.textContent=finished?"✓ Concluído":done?done+"/"+part.length+" concluídas":"A realizar";
+          const hint=parent.querySelector("summary small");
+          if(hint)hint.textContent=finished?"Bloco finalizado; clique para consultar as atividades.":key==="morning"?"O que falta no bloco da manhã":"Estas são atividades previstas para a noite, não novas tarefas da manhã.";
+        }
       }else renderDay(days,b);
     }else renderDay(days,b);
     feedbackEnd();
@@ -1165,10 +1222,14 @@
       const activeBtn=nav?.querySelector('[data-page="sprint28"]');
       if(activeBtn)window.switchPage("sprint28",activeBtn);
     }
-    window.addEventListener("cgu-cloud-ready",()=>{if(document.getElementById("page-sprint28")?.classList.contains("active"))render({keepComp:false})});
+    window.addEventListener("cgu-cloud-ready",()=>{
+      freezeTodayAfterCloud();
+      if(document.getElementById("page-sprint28")?.classList.contains("active"))render({keepComp:false});
+    });
     window.addEventListener("cgu-question-recorded",ev=>{if(document.getElementById("page-sprint28")?.classList.contains("active")&&!String(ev.detail?.source||"").startsWith("reta-final-"))requestAnimationFrame(()=>render())});
     window.addEventListener("cgu-p4-changed",()=>{if(document.getElementById("page-sprint28")?.classList.contains("active"))requestAnimationFrame(()=>render())});
   }
   window.CGU28_render=render;
+  window.CGU28_freezeToday=freezeTodayAfterCloud;
   setup();
 })();
