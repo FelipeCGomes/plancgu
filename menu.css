@@ -91,3 +91,11 @@
   .topbar{position:sticky!important;top:0!important;z-index:40}
   .menu-toggle{padding:8px 9px;font-size:11px}
 }
+
+
+/* Exportacao de desempenho: acao separada da navegacao de paginas e do backup. */
+.study-export-control{display:flex;flex-direction:column;gap:5px;margin:15px 0 4px}
+.study-export-control button{display:block;width:100%;padding:11px 12px;border-radius:10px;border:1px solid #86c9ff;background:#2563eb;color:#fff;font-size:12px;font-weight:800;line-height:1.4;text-align:left;cursor:pointer;transition:background .15s ease}
+.study-export-control button:hover,.study-export-control button:focus-visible{background:#1d4ed8;outline-offset:2px}
+.study-export-control button:disabled{opacity:.6;cursor:wait}
+.study-export-control small{display:block;color:#cbd5e1;font-size:10px;line-height:1.45;padding:0 3px}
