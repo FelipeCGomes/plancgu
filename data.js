@@ -28,6 +28,7 @@ const EDITAL=[...EDITAL_P1,...EDITAL_P2,...EDITAL_P3];
   addCss("question-rounds.css?v=20261101-2","questionRoundsCss");
   addCss("edital-filters.css?v=20261102-1","editalFiltersCss");
   addCss("sprint28.css?v=20261111-fixed1","sprint28Css");
+  addCss("study-status-colors.css?v=20261121-1","studyStatusColorsCss");
 
   window.addEventListener("load",async()=>{
     try{
@@ -70,7 +71,8 @@ const EDITAL=[...EDITAL_P1,...EDITAL_P2,...EDITAL_P3];
       // Última camada do Plano: evita rerender global e remove textos redundantes.
       await loadScript("plan-focus-ui.js?v=20261104-1","planFocusUi");
       await loadScript("weighted-score-ui.js?v=20261108-3","weightedScoreUi");
-      await loadScript("sprint28.js?v=20261111-fixed2","sprint28");
+      await loadScript("study-status-colors.js?v=20261121-1","studyStatusColors");
+      await loadScript("sprint28.js?v=20261121-status1","sprint28");
       if(typeof renderAll==="function")renderAll();
       if(typeof window.CGU_renderEditalTimeline==="function")window.CGU_renderEditalTimeline();
       if(typeof window.CGU_optimizeDashboard==="function")window.CGU_optimizeDashboard();
