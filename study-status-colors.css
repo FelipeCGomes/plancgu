@@ -1,0 +1,52 @@
+/* Faixas de desempenho em todas as telas: verde >= meta, laranja ate 5 p.p., vermelho > 5 p.p., cinza sem amostra.
+   Cores indicam desempenho em questoes; conclusao da atividade continua independente. */
+.cgu-score-pill{display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;padding:4px 8px;border-radius:999px;border:1px solid transparent;font-size:10px;font-weight:850;line-height:1.25;white-space:nowrap}
+.cgu-score-pill.cgu-score-healthy{background:#dcfce7;border-color:#86efac;color:#166534}
+.cgu-score-pill.cgu-score-near{background:#ffedd5;border-color:#fdba74;color:#9a3412}
+.cgu-score-pill.cgu-score-low{background:#fee2e2;border-color:#fca5a5;color:#991b1b}
+.cgu-score-pill.cgu-score-unknown{background:#f1f5f9;border-color:#cbd5e1;color:#475569}
+
+/* Intensivao: vence a classe .done verde quando o conhecimento ainda esta abaixo da meta. */
+#page-sprint28 .s28-task.cgu-score-healthy{background:#f0fdf4;border-color:#86efac}
+#page-sprint28 .s28-task.cgu-score-near{background:#fff7ed;border-color:#fdba74}
+#page-sprint28 .s28-task.cgu-score-low{background:#fff1f2;border-color:#fca5a5}
+#page-sprint28 .s28-task.cgu-score-unknown{background:#f8fafc;border-color:#cbd5e1}
+#page-sprint28 .s28-task.cgu-score-healthy{box-shadow:inset 4px 0 0 #16a34a}
+#page-sprint28 .s28-task.cgu-score-near{box-shadow:inset 4px 0 0 #ea580c}
+#page-sprint28 .s28-task.cgu-score-low{box-shadow:inset 4px 0 0 #dc2626}
+#page-sprint28 .s28-task.cgu-score-unknown{box-shadow:inset 4px 0 0 #94a3b8}
+#page-sprint28 .s28-task.cgu-score-near .s28-topic{color:#9a3412}
+#page-sprint28 .s28-task.cgu-score-low .s28-topic{color:#991b1b}
+#page-sprint28 .s28-task.cgu-score-near .s28-result{background:#ffedd5;color:#9a3412}
+#page-sprint28 .s28-task.cgu-score-low .s28-result{background:#fee2e2;color:#991b1b}
+#page-sprint28 .s28-task.cgu-score-unknown .s28-result{background:#e2e8f0;color:#475569}
+#page-sprint28 .s28-task.done.cgu-score-near .s28-actions .primary{background:#fff7ed;border-color:#fdba74;color:#9a3412}
+#page-sprint28 .s28-task.done.cgu-score-low .s28-actions .primary{background:#fff1f2;border-color:#fca5a5;color:#991b1b}
+#page-sprint28 .s28-task.done.cgu-score-unknown .s28-actions .primary{background:#f1f5f9;border-color:#cbd5e1;color:#475569}
+
+/* Edital: linhas por subitem com faixa lateral discreta. */
+#page-edital .topic.cgu-score-healthy{background:#f0fdf4;box-shadow:inset 4px 0 0 #16a34a}
+#page-edital .topic.cgu-score-near{background:#fff7ed;box-shadow:inset 4px 0 0 #ea580c}
+#page-edital .topic.cgu-score-low{background:#fff1f2;box-shadow:inset 4px 0 0 #dc2626}
+#page-edital .topic.cgu-score-unknown{background:#f8fafc;box-shadow:inset 4px 0 0 #94a3b8}
+#page-edital .topic .topic-top{flex-wrap:wrap}
+
+/* Revisar: destaque laranja para quem esta a ate 5 pontos da meta. */
+#page-revisar .review-card.cgu-score-healthy{background:#f0fdf4;border-color:#86efac;border-left-color:#16a34a}
+#page-revisar .review-card.cgu-score-near{background:#fff7ed;border-color:#fdba74;border-left-color:#ea580c}
+#page-revisar .review-card.cgu-score-low{background:#fff1f2;border-color:#fca5a5;border-left-color:#dc2626}
+#page-revisar .review-card.cgu-score-unknown{background:#f8fafc;border-color:#cbd5e1;border-left-color:#94a3b8}
+#page-revisar .review-card .topic-top{flex-wrap:wrap}
+
+/* Indicador % liquido e Meta/status: nao altera valores calculados. */
+#page-edital .metric.cgu-score-metric.cgu-score-healthy,
+#page-revisar .metric.cgu-score-metric.cgu-score-healthy{background:#dcfce7;border-color:#86efac;color:#166534}
+#page-edital .metric.cgu-score-metric.cgu-score-near,
+#page-revisar .metric.cgu-score-metric.cgu-score-near{background:#ffedd5;border-color:#fdba74;color:#9a3412}
+#page-edital .metric.cgu-score-metric.cgu-score-low,
+#page-revisar .metric.cgu-score-metric.cgu-score-low{background:#fee2e2;border-color:#fca5a5;color:#991b1b}
+#page-edital .metric.cgu-score-metric.cgu-score-unknown,
+#page-revisar .metric.cgu-score-metric.cgu-score-unknown{background:#f1f5f9;border-color:#cbd5e1;color:#475569}
+@media(max-width:700px){
+  .cgu-score-pill{white-space:normal;font-size:9px;text-align:center}
+}
