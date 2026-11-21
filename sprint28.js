@@ -669,7 +669,13 @@
   }
   function taskTitle(t){
     const x=byId(t.topicId);
-    return x?'<div class="s28-topic">'+esc(fullTitle(x))+'</div><div class="s28-topic-meta">'+esc(x.d.nome)+' · '+x.exam+' · '+esc(x.priority||"")+' · '+(x.m?.status||"Pendente")+(x.m?.q?' · '+fmt(x.m.liquido,1)+'% líquido':" · sem questões")+'</div>':"";
+    if(!x)return "";
+    const tone=window.CGU_StudyStatusColors?.tone(x.m?.liquido,x.m?.meta,x.m?.q)||"cgu-score-unknown";
+    const status=window.CGU_StudyStatusColors?.label(x.m?.liquido,x.m?.meta,x.m?.q)||x.m?.status||"Sem amostra";
+    return '<div class="s28-topic">'+esc(fullTitle(x))+'</div>'+
+      '<div class="s28-topic-meta">'+esc(x.d.nome)+' · '+x.exam+' · '+esc(x.priority||"")+
+      ' · <span class="cgu-score-pill '+tone+'">'+esc(status)+'</span>'+
+      (x.m?.q?' · '+fmt(x.m.liquido,1)+'% líquido · meta '+fmt(x.m.meta,1)+'%':" · sem questões")+'</div>';
   }
   function resultsFor(day,t,b){
     const result=b.mocks[day.date]?.[t.id];
@@ -814,6 +820,7 @@
 
   function renderTask(day,t,b){
     const done=completed(t,day,b),x=t.topicId?byId(t.topicId):null,exam=x?.exam||"";
+    const scoreTone=x?(window.CGU_StudyStatusColors?.tone(x.m?.liquido,x.m?.meta,x.m?.q)||"cgu-score-unknown"):"";
     let actions="";
     if(t.kind==="study"||t.kind==="review"||t.kind==="bridge"){
       actions='<button class="primary" type="button" onclick="CGU28_toggle(\''+day.date+'\',\''+t.id+'\')">'+(done?"✓ Concluído — reabrir":"✓ Marcar atividade concluída")+'</button>';
@@ -833,7 +840,7 @@
       '<button type="button" onclick="CGU28_toggle(\''+day.date+'\',\''+t.id+'\')">'+(b.days[day.date]?.checks?.[t.id]?"Desmarcar rascunho":"Marcar rascunho feito")+'</button></div>';
     }
     const last=x?.m?.q?' · última amostra: '+fmt(x.m.q)+' questões · '+fmt(x.m.liquido,1)+'% líquido · peso '+WEIGHT[exam]:'';
-    return '<article class="s28-task '+(done?'done':'')+'" data-task="'+t.id+'">'+
+    return '<article class="s28-task '+(done?'done ':'')+scoreTone+'" data-task="'+t.id+'">'+
       '<header><strong>'+(done?'✓ ':'')+esc(t.title)+'</strong><small>'+(t.timeLabel?esc(t.timeLabel)+' · ':'')+t.minutes+' min'+last+'</small></header>'+
       (t.topicId?taskTitle(t):'')+'<p>'+esc(t.description||"")+'</p>'+
       (t.kind==="pairMock"?'<div class="s28-subline">Conexão para Q2: '+esc(t.pair?.case||"")+'</div>':'')+
